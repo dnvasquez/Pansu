@@ -1,0 +1,193 @@
+{
+  "header": {
+    "heroPrimary": "PAN",
+    "heroSecondary": "SUR Paneles Solares",
+    "heroDescription": "Los paneles solares son perfectos si buscas una fuente confiable de energia adicional para tu hogar u oficina.",
+    "heroButtonText": "Mas informacion",
+    "heroButtonLink": "#about",
+    "slides": [
+      "images/slide-03.jpg",
+      "images/slide-02.jpg",
+      "images/slide-01.jpg"
+    ]
+  },
+  "why": {
+    "caption": "Descubre los principales beneficios de trabajar con nosotros en cada etapa de tu proyecto solar.",
+    "items": [
+      {
+        "iconClass": "fa-solid fa-chart-line",
+        "title": "Calcula tu ahorro",
+        "description": "Con nuestra calculadora de ahorro, puedes tomar la mejor decision para instalar paneles solares de PANSU."
+      },
+      {
+        "iconClass": "fa-solid fa-solar-panel",
+        "title": "Instalacion: Como funciona?",
+        "description": "Conoce todos los aspectos del proceso de instalacion de paneles solares junto a nuestros expertos y resuelve tus dudas."
+      },
+      {
+        "iconClass": "fa-solid fa-headset",
+        "title": "Soporte al cliente 24/7",
+        "description": "Nuestra empresa ofrece soporte gratuito 24/7 a todos nuestros clientes que tengan consultas o problemas con los productos y servicios de PANSU."
+      }
+    ]
+  },
+  "kpis": {
+    "items": [
+      {
+        "iconClass": "fa-solid fa-solar-panel",
+        "value": "1.250+",
+        "label": "Instalaciones realizadas"
+      },
+      {
+        "iconClass": "fa-solid fa-house-chimney",
+        "value": "980+",
+        "label": "Hogares con energia solar"
+      },
+      {
+        "iconClass": "fa-solid fa-building",
+        "value": "270+",
+        "label": "Proyectos comerciales"
+      },
+      {
+        "iconClass": "fa-solid fa-bolt",
+        "value": "32%",
+        "label": "Ahorro promedio anual"
+      }
+    ]
+  },
+  "about": {
+    "title": "Quienes somos",
+    "subtitle": "Equipo de especialistas en energia alternativa",
+    "description": "Nuestra empresa ofrece un servicio integral y orientado al cliente en energia alternativa, centrado en la comercializacion, distribucion y transporte de paneles solares. Somos una empresa de energia renovable amigable con el medioambiente que ofrece un amplio portafolio de tecnologias, productos y soluciones para nuestros clientes.",
+    "images": [
+      "images/about-01-639x480.jpg",
+      "images/about-02-639x480.jpg",
+      "images/about-03-639x480.jpg"
+    ]
+  },
+  "contact": {
+    "contactTitle": "Contactanos",
+    "navPhone": "555-376-7872",
+    "formTitle": "Solicita una cotizacion para una instalacion de paneles solares residencial o comercial",
+    "offices": [
+      {
+        "name": "Oficina central (Boston, MA, EE. UU.)",
+        "address1": "8949 Kenamar Drive, Suite 101",
+        "address2": "Boston, MA 92121",
+        "phone": "555-376-7872",
+        "fax": "555-376-7873"
+      },
+      {
+        "name": "Oficina de Toronto",
+        "address1": "2000 Finch Avenue West",
+        "address2": "Toronto, Ontario M3J 2V5",
+        "phone": "555-376-7872",
+        "fax": "555-376-7873"
+      }
+    ]
+  },
+  "social": {
+    "links": [
+      {
+        "key": "facebook",
+        "label": "Facebook",
+        "iconClass": "fa-brands fa-facebook-f",
+        "href": "#",
+        "enabled": true
+      },
+      {
+        "key": "twitter",
+        "label": "X (Twitter)",
+        "iconClass": "fa-brands fa-x-twitter",
+        "href": "#",
+        "enabled": true
+      },
+      {
+        "key": "youtube",
+        "label": "YouTube",
+        "iconClass": "fa-brands fa-youtube",
+        "href": "#",
+        "enabled": true
+      },
+      {
+        "key": "linkedin",
+        "label": "LinkedIn",
+        "iconClass": "fa-brands fa-linkedin-in",
+        "href": "#",
+        "enabled": true
+      }
+    ]
+  },
+  "faq": {
+    "items": [
+      {
+        "question": "Cuanto puedo ahorrar con paneles solares?",
+        "answer": "El ahorro depende de tu consumo, ubicacion y porcentaje de cobertura solar. Puedes usar la calculadora del sitio para obtener una referencia inicial."
+      },
+      {
+        "question": "Cuanto tarda la instalacion?",
+        "answer": "En proyectos residenciales suele completarse en pocos dias luego de la visita tecnica y validacion del sistema recomendado."
+      },
+      {
+        "question": "Que incluye el servicio de PANSU?",
+        "answer": "Incluye asesoria, propuesta tecnica, instalacion, puesta en marcha y acompanamiento postventa segun el tipo de proyecto."
+      }
+    ]
+  },
+  "quote": {
+    "destinationEmail": "ventas@pansur.cl"
+  },
+  "products": {
+    "products": [
+      {
+        "id": "p1",
+        "title": "NeON 2 315W",
+        "image": "images/product-01-370x300.jpg",
+        "description": "Panel solar monocristalino de alta eficiencia para instalaciones residenciales, con excelente rendimiento en distintas condiciones climaticas."
+      },
+      {
+        "id": "p2",
+        "title": "SolarWorld SW 270 Black",
+        "image": "images/product-02-370x300.jpg",
+        "description": "Panel de diseno elegante color negro, ideal para proyectos que requieren estetica y produccion energetica confiable."
+      },
+      {
+        "id": "p3",
+        "title": "EcoGreen 5W 12V Panel Solar",
+        "image": "images/product-03-370x300.jpg",
+        "description": "Solucion compacta para consumos menores, perfecta para sistemas aislados, iluminacion y respaldo de energia."
+      },
+      {
+        "id": "p4",
+        "title": "Kit residencial 3kW",
+        "image": "images/product-01-370x300.jpg",
+        "description": "Kit completo para vivienda, pensado para reducir el consumo electrico mensual y mejorar la autonomia energetica del hogar."
+      },
+      {
+        "id": "p5",
+        "title": "Kit comercial 8kW",
+        "image": "images/product-02-370x300.jpg",
+        "description": "Sistema para comercios y pymes con mayor demanda, disenado para estabilizar costos y optimizar el retorno de inversion."
+      },
+      {
+        "id": "p6",
+        "title": "Inversor hibrido 5kW",
+        "image": "images/product-03-370x300.jpg",
+        "description": "Inversor hibrido para integrar paneles, red y baterias, permitiendo mayor continuidad operativa y control del consumo."
+      }
+    ],
+    "featuredIds": [
+      "p1",
+      "p2",
+      "p3"
+    ]
+  },
+  "savings": {
+    "defaultKwh": 320,
+    "defaultBill": 85000,
+    "coverageMin": 20,
+    "coverageMax": 95,
+    "coverageStep": 5,
+    "coverageDefault": 60
+  }
+}

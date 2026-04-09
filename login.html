@@ -204,6 +204,7 @@
       </section>
     </main>
 
+    <script src="js/cms-client.js"></script>
     <script>
       (function () {
         var form = document.getElementById('login-form');
@@ -211,6 +212,14 @@
         var params = new URLSearchParams(window.location.search);
         var next = params.get('next') || '/admin.html';
         var isFileProtocol = window.location.protocol === 'file:';
+
+        if (window.PansurCMS) {
+          window.PansurCMS.getSession().then(function (session) {
+            if (session && session.authenticated) {
+              window.location.href = next;
+            }
+          }).catch(function () {});
+        }
 
         if (isFileProtocol) {
           status.textContent = 'Debes abrir el login desde el servidor local, por ejemplo http://127.0.0.1:3000/login.html.';
@@ -245,7 +254,7 @@
           } catch (err) {
             status.textContent = isFileProtocol
               ? 'No hay servidor activo. Abre el sitio desde http://127.0.0.1:3000/login.html.'
-              : 'Error de conexion. Verifica que el servidor Node este ejecutandose en http://127.0.0.1:3000.';
+              : 'Error de conexion. Verifica la configuracion del sitio en Netlify.';
             status.style.color = '#b02020';
           }
         });

@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  var SECTION = 'social';
   var KEY = 'pansur_social_cms_v1';
   var LINK_MAX = 300;
   var DEFAULTS = {
@@ -85,15 +86,20 @@
       .replace(/"/g, '&quot;');
   }
 
-  function init() {
+  async function init() {
     var form = byId('social-cms-form');
     var resetBtn = byId('reset-btn');
     if (!form || !resetBtn) return;
 
+    if (window.PansurCMS) {
+      await window.PansurCMS.requireAuth();
+      await window.PansurCMS.syncFromServer();
+    }
+
     state = loadData();
     render();
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
       var payload = {
         links: state.links.map(function (item) {
@@ -106,15 +112,33 @@
           };
         })
       };
-      localStorage.setItem(KEY, JSON.stringify(payload));
-      setStatus('Configuracion de redes sociales guardada correctamente.', true);
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.saveSection(SECTION, payload);
+        } else {
+          localStorage.setItem(KEY, JSON.stringify(payload));
+        }
+        setStatus('Configuracion de redes sociales guardada correctamente.', true);
+      } catch (err) {
+        setStatus('No se pudo guardar la configuracion de redes sociales.', false);
+      }
     });
 
-    resetBtn.addEventListener('click', function () {
-      localStorage.removeItem(KEY);
-      state = clone(DEFAULTS);
-      render();
-      setStatus('Se restauraron los valores por defecto.', true);
+    resetBtn.addEventListener('click', async function () {
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.resetSection(SECTION);
+          await window.PansurCMS.syncFromServer();
+          state = loadData();
+        } else {
+          localStorage.removeItem(KEY);
+          state = clone(DEFAULTS);
+        }
+        render();
+        setStatus('Se restauraron los valores por defecto.', true);
+      } catch (err) {
+        setStatus('No se pudo restaurar la configuracion de redes sociales.', false);
+      }
     });
   }
 

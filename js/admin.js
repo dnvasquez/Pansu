@@ -1,6 +1,7 @@
 ﻿(function () {
   'use strict';
 
+  var SECTION = 'products';
   var KEY = 'pansur_products_cms_v2';
   var LEGACY_KEY = 'pansur_products_cms_v1';
   var TITLE_MAX = 80;
@@ -87,7 +88,11 @@
     return clone(DEFAULT_DATA);
   }
 
-  function saveData() {
+  async function saveData() {
+    if (window.PansurCMS) {
+      await window.PansurCMS.saveSection(SECTION, state);
+      return;
+    }
     localStorage.setItem(KEY, JSON.stringify(state));
   }
 
@@ -272,11 +277,16 @@
     return true;
   }
 
-  function init() {
+  async function init() {
     var form = byId('products-cms-form');
     var resetBtn = byId('reset-btn');
     var addBtn = byId('add-product-btn');
     if (!form || !resetBtn || !addBtn) return;
+
+    if (window.PansurCMS) {
+      await window.PansurCMS.requireAuth();
+      await window.PansurCMS.syncFromServer();
+    }
 
     state = loadData();
     bindFeaturedEvents();
@@ -293,18 +303,32 @@
       render();
     });
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
       if (!validateBeforeSave()) return;
-      saveData();
-      setStatus('Cambios guardados correctamente.', true);
+      try {
+        await saveData();
+        setStatus('Cambios guardados correctamente.', true);
+      } catch (err) {
+        setStatus('No se pudieron guardar los productos.', false);
+      }
     });
 
-    resetBtn.addEventListener('click', function () {
-      localStorage.removeItem(KEY);
-      state = clone(DEFAULT_DATA);
-      render();
-      setStatus('Se restauraron los valores por defecto.', true);
+    resetBtn.addEventListener('click', async function () {
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.resetSection(SECTION);
+          await window.PansurCMS.syncFromServer();
+          state = loadData();
+        } else {
+          localStorage.removeItem(KEY);
+          state = clone(DEFAULT_DATA);
+        }
+        render();
+        setStatus('Se restauraron los valores por defecto.', true);
+      } catch (err) {
+        setStatus('No se pudieron restaurar los productos.', false);
+      }
     });
   }
 

@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  var SECTION = 'why';
   var KEY = 'pansur_why_cms_v1';
   var CAPTION_MAX = 220;
   var ICON_MAX = 80;
@@ -119,11 +120,16 @@
     });
   }
 
-  function init() {
+  async function init() {
     var form = byId('why-cms-form');
     var captionInput = byId('why-caption');
     var resetBtn = byId('reset-btn');
     if (!form || !captionInput || !resetBtn) return;
+
+    if (window.PansurCMS) {
+      await window.PansurCMS.requireAuth();
+      await window.PansurCMS.syncFromServer();
+    }
 
     state = loadData();
     captionInput.value = state.caption;
@@ -134,7 +140,7 @@
       captionInput.value = state.caption;
     });
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
       var payload = {
         caption: String(state.caption || '').trim().slice(0, CAPTION_MAX),
@@ -147,16 +153,34 @@
           };
         })
       };
-      localStorage.setItem(KEY, JSON.stringify(payload));
-      setStatus('Seccion Por que PANSU actualizada correctamente.', true);
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.saveSection(SECTION, payload);
+        } else {
+          localStorage.setItem(KEY, JSON.stringify(payload));
+        }
+        setStatus('Seccion Por que PANSU actualizada correctamente.', true);
+      } catch (err) {
+        setStatus('No se pudo guardar la seccion Por que PANSU.', false);
+      }
     });
 
-    resetBtn.addEventListener('click', function () {
-      localStorage.removeItem(KEY);
-      state = clone(DEFAULTS);
-      captionInput.value = state.caption;
-      render();
-      setStatus('Se restauraron los valores por defecto.', true);
+    resetBtn.addEventListener('click', async function () {
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.resetSection(SECTION);
+          await window.PansurCMS.syncFromServer();
+          state = loadData();
+        } else {
+          localStorage.removeItem(KEY);
+          state = clone(DEFAULTS);
+        }
+        captionInput.value = state.caption;
+        render();
+        setStatus('Se restauraron los valores por defecto.', true);
+      } catch (err) {
+        setStatus('No se pudo restaurar la seccion Por que PANSU.', false);
+      }
     });
   }
 

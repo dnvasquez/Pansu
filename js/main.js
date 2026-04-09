@@ -1278,26 +1278,32 @@
 
   /* ── Boot ──────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
-    initLogo();
-    initHeaderCMS();
-    initPreloader();
-    initSlider();
-    initNavbar();
-    initFormLabels();
-    initParallax();
-    initCarousel();
-    initBackToTop();
-    initSavingsCalculator();
-    initProductsCMS();
-    initProductDetailPage();
-    initContactCMS();
-    initAboutCMS();
-    initQuoteFormsCMS();
-    initMobileQuoteCTA();
-    initFaqCMS();
-    initWhyCMS();
-    initKpisCMS();
-    initSocialCMS();
-    initCopyright();
+    var syncPromise = window.PansurCMS && typeof window.PansurCMS.syncFromServer === 'function'
+      ? window.PansurCMS.syncFromServer().catch(function () { return null; })
+      : Promise.resolve(null);
+
+    syncPromise.finally(function () {
+      initLogo();
+      initHeaderCMS();
+      initPreloader();
+      initSlider();
+      initNavbar();
+      initFormLabels();
+      initParallax();
+      initCarousel();
+      initBackToTop();
+      initSavingsCalculator();
+      initProductsCMS();
+      initProductDetailPage();
+      initContactCMS();
+      initAboutCMS();
+      initQuoteFormsCMS();
+      initMobileQuoteCTA();
+      initFaqCMS();
+      initWhyCMS();
+      initKpisCMS();
+      initSocialCMS();
+      initCopyright();
+    });
   });
 })();

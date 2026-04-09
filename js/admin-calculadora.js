@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  var SECTION = 'savings';
   var KEY = 'pansur_savings_cms_v1';
   var DEFAULTS = {
     defaultKwh: 320,
@@ -78,25 +79,48 @@
     return data;
   }
 
-  function init() {
+  async function init() {
     var form = byId('savings-cms-form');
     var resetBtn = byId('reset-btn');
     if (!form || !resetBtn) return;
 
+    if (window.PansurCMS) {
+      await window.PansurCMS.requireAuth();
+      await window.PansurCMS.syncFromServer();
+    }
+
     fill(loadData());
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
       var data = collect();
       if (!data) return;
-      localStorage.setItem(KEY, JSON.stringify(data));
-      setStatus('Configuracion de calculadora guardada correctamente.', true);
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.saveSection(SECTION, data);
+        } else {
+          localStorage.setItem(KEY, JSON.stringify(data));
+        }
+        setStatus('Configuracion de calculadora guardada correctamente.', true);
+      } catch (err) {
+        setStatus('No se pudo guardar la configuracion de la calculadora.', false);
+      }
     });
 
-    resetBtn.addEventListener('click', function () {
-      localStorage.removeItem(KEY);
-      fill(clone(DEFAULTS));
-      setStatus('Se restauraron los valores por defecto.', true);
+    resetBtn.addEventListener('click', async function () {
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.resetSection(SECTION);
+          await window.PansurCMS.syncFromServer();
+          fill(loadData());
+        } else {
+          localStorage.removeItem(KEY);
+          fill(clone(DEFAULTS));
+        }
+        setStatus('Se restauraron los valores por defecto.', true);
+      } catch (err) {
+        setStatus('No se pudo restaurar la calculadora.', false);
+      }
     });
   }
 

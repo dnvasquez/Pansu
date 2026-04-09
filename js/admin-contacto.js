@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  var SECTION = 'contact';
   var KEY = 'pansur_contact_cms_v1';
   var CONTACT_TITLE_MAX = 70;
   var NAV_PHONE_MAX = 24;
@@ -145,11 +146,16 @@
     };
   }
 
-  function init() {
+  async function init() {
     var form = byId('contact-cms-form');
     var resetBtn = byId('reset-btn');
     var addOfficeBtn = byId('add-office-btn');
     if (!form || !resetBtn || !addOfficeBtn) return;
+
+    if (window.PansurCMS) {
+      await window.PansurCMS.requireAuth();
+      await window.PansurCMS.syncFromServer();
+    }
 
     state = loadData();
     fill(state);
@@ -159,17 +165,36 @@
       renderOffices();
     });
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
-      localStorage.setItem(KEY, JSON.stringify(collect()));
-      setStatus('Informacion de contacto guardada correctamente.', true);
+      try {
+        var payload = collect();
+        if (window.PansurCMS) {
+          await window.PansurCMS.saveSection(SECTION, payload);
+        } else {
+          localStorage.setItem(KEY, JSON.stringify(payload));
+        }
+        setStatus('Informacion de contacto guardada correctamente.', true);
+      } catch (err) {
+        setStatus('No se pudo guardar la informacion de contacto.', false);
+      }
     });
 
-    resetBtn.addEventListener('click', function () {
-      localStorage.removeItem(KEY);
-      state = clone(DEFAULTS);
-      fill(state);
-      setStatus('Se restauraron los valores por defecto.', true);
+    resetBtn.addEventListener('click', async function () {
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.resetSection(SECTION);
+          await window.PansurCMS.syncFromServer();
+          state = loadData();
+        } else {
+          localStorage.removeItem(KEY);
+          state = clone(DEFAULTS);
+        }
+        fill(state);
+        setStatus('Se restauraron los valores por defecto.', true);
+      } catch (err) {
+        setStatus('No se pudo restaurar la informacion de contacto.', false);
+      }
     });
   }
 

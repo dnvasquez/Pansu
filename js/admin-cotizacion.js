@@ -1,6 +1,7 @@
 ﻿(function () {
   'use strict';
 
+  var SECTION = 'quote';
   var KEY = 'pansur_quote_cms_v1';
   var EMAIL_MAX = 120;
   var DEFAULTS = {
@@ -24,15 +25,20 @@
     el.style.color = ok ? '#1f7a1f' : '#b02020';
   }
 
-  function init() {
+  async function init() {
     var form = byId('quote-cms-form');
     var resetBtn = byId('reset-btn');
     var emailInput = byId('quote-destination-email');
     if (!form || !resetBtn || !emailInput) return;
 
+    if (window.PansurCMS) {
+      await window.PansurCMS.requireAuth();
+      await window.PansurCMS.syncFromServer();
+    }
+
     emailInput.value = loadData().destinationEmail || DEFAULTS.destinationEmail;
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
       var email = (emailInput.value || '').trim().slice(0, EMAIL_MAX);
       emailInput.value = email;
@@ -40,14 +46,32 @@
         setStatus('Debes ingresar un correo destino valido.', false);
         return;
       }
-      localStorage.setItem(KEY, JSON.stringify({ destinationEmail: email }));
-      setStatus('Correo de destino actualizado correctamente.', true);
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.saveSection(SECTION, { destinationEmail: email });
+        } else {
+          localStorage.setItem(KEY, JSON.stringify({ destinationEmail: email }));
+        }
+        setStatus('Correo de destino actualizado correctamente.', true);
+      } catch (err) {
+        setStatus('No se pudo guardar el correo destino.', false);
+      }
     });
 
-    resetBtn.addEventListener('click', function () {
-      localStorage.removeItem(KEY);
-      emailInput.value = DEFAULTS.destinationEmail;
-      setStatus('Se restauraron los valores por defecto.', true);
+    resetBtn.addEventListener('click', async function () {
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.resetSection(SECTION);
+          await window.PansurCMS.syncFromServer();
+          emailInput.value = loadData().destinationEmail || DEFAULTS.destinationEmail;
+        } else {
+          localStorage.removeItem(KEY);
+          emailInput.value = DEFAULTS.destinationEmail;
+        }
+        setStatus('Se restauraron los valores por defecto.', true);
+      } catch (err) {
+        setStatus('No se pudo restaurar el correo destino.', false);
+      }
     });
   }
 

@@ -1,6 +1,7 @@
 ﻿(function () {
   'use strict';
 
+  var SECTION = 'about';
   var KEY = 'pansur_about_cms_v1';
   var TITLE_MAX = 70;
   var SUBTITLE_MAX = 110;
@@ -107,26 +108,49 @@
     return data;
   }
 
-  function init() {
+  async function init() {
     var form = byId('about-cms-form');
     var resetBtn = byId('reset-btn');
     if (!form || !resetBtn) return;
 
+    if (window.PansurCMS) {
+      await window.PansurCMS.requireAuth();
+      await window.PansurCMS.syncFromServer();
+    }
+
     fill(loadData());
     bindImageInputs();
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
       var data = collect();
       if (!data) return;
-      localStorage.setItem(KEY, JSON.stringify(data));
-      setStatus('Seccion Quienes Somos actualizada correctamente.', true);
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.saveSection(SECTION, data);
+        } else {
+          localStorage.setItem(KEY, JSON.stringify(data));
+        }
+        setStatus('Seccion Quienes Somos actualizada correctamente.', true);
+      } catch (err) {
+        setStatus('No se pudo guardar la seccion Quienes Somos.', false);
+      }
     });
 
-    resetBtn.addEventListener('click', function () {
-      localStorage.removeItem(KEY);
-      fill(clone(DEFAULTS));
-      setStatus('Se restauraron los valores por defecto.', true);
+    resetBtn.addEventListener('click', async function () {
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.resetSection(SECTION);
+          await window.PansurCMS.syncFromServer();
+        } else {
+          localStorage.removeItem(KEY);
+        }
+        fill(clone(DEFAULTS));
+        if (window.PansurCMS) fill(loadData());
+        setStatus('Se restauraron los valores por defecto.', true);
+      } catch (err) {
+        setStatus('No se pudo restaurar la seccion Quienes Somos.', false);
+      }
     });
   }
 

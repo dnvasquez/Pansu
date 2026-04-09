@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  var SECTION = 'faq';
   var KEY = 'pansur_faq_cms_v1';
   var QUESTION_MAX = 120;
   var ANSWER_MAX = 320;
@@ -135,11 +136,16 @@
     return true;
   }
 
-  function init() {
+  async function init() {
     var form = byId('faq-cms-form');
     var resetBtn = byId('reset-btn');
     var addBtn = byId('add-faq-btn');
     if (!form || !resetBtn || !addBtn) return;
+
+    if (window.PansurCMS) {
+      await window.PansurCMS.requireAuth();
+      await window.PansurCMS.syncFromServer();
+    }
 
     state = loadData();
     render();
@@ -149,18 +155,36 @@
       render();
     });
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
       if (!validate()) return;
-      localStorage.setItem(KEY, JSON.stringify({ items: state.items }));
-      setStatus('Preguntas frecuentes guardadas correctamente.', true);
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.saveSection(SECTION, { items: state.items });
+        } else {
+          localStorage.setItem(KEY, JSON.stringify({ items: state.items }));
+        }
+        setStatus('Preguntas frecuentes guardadas correctamente.', true);
+      } catch (err) {
+        setStatus('No se pudieron guardar las preguntas frecuentes.', false);
+      }
     });
 
-    resetBtn.addEventListener('click', function () {
-      localStorage.removeItem(KEY);
-      state = clone(DEFAULTS);
-      render();
-      setStatus('Se restauraron los valores por defecto.', true);
+    resetBtn.addEventListener('click', async function () {
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.resetSection(SECTION);
+          await window.PansurCMS.syncFromServer();
+          state = loadData();
+        } else {
+          localStorage.removeItem(KEY);
+          state = clone(DEFAULTS);
+        }
+        render();
+        setStatus('Se restauraron los valores por defecto.', true);
+      } catch (err) {
+        setStatus('No se pudieron restaurar las preguntas frecuentes.', false);
+      }
     });
   }
 

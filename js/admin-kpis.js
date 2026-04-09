@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  var SECTION = 'kpis';
   var KEY = 'pansur_kpis_cms_v1';
   var MAX_ITEMS = 4;
   var MIN_ITEMS = 1;
@@ -139,18 +140,23 @@
     render();
   }
 
-  function init() {
+  async function init() {
     var form = byId('kpis-cms-form');
     var addBtn = byId('add-kpi-btn');
     var resetBtn = byId('reset-btn');
     if (!form || !addBtn || !resetBtn) return;
+
+    if (window.PansurCMS) {
+      await window.PansurCMS.requireAuth();
+      await window.PansurCMS.syncFromServer();
+    }
 
     state = loadData();
     render();
 
     addBtn.addEventListener('click', addKpi);
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
       var payload = {
         items: state.items.map(function (item, idx) {
@@ -170,15 +176,33 @@
         return;
       }
 
-      localStorage.setItem(KEY, JSON.stringify(payload));
-      setStatus('KPIs actualizados correctamente.', true);
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.saveSection(SECTION, payload);
+        } else {
+          localStorage.setItem(KEY, JSON.stringify(payload));
+        }
+        setStatus('KPIs actualizados correctamente.', true);
+      } catch (err) {
+        setStatus('No se pudieron guardar los KPIs.', false);
+      }
     });
 
-    resetBtn.addEventListener('click', function () {
-      localStorage.removeItem(KEY);
-      state = clone(DEFAULTS);
-      render();
-      setStatus('Se restauraron los KPIs por defecto.', true);
+    resetBtn.addEventListener('click', async function () {
+      try {
+        if (window.PansurCMS) {
+          await window.PansurCMS.resetSection(SECTION);
+          await window.PansurCMS.syncFromServer();
+          state = loadData();
+        } else {
+          localStorage.removeItem(KEY);
+          state = clone(DEFAULTS);
+        }
+        render();
+        setStatus('Se restauraron los KPIs por defecto.', true);
+      } catch (err) {
+        setStatus('No se pudieron restaurar los KPIs.', false);
+      }
     });
   }
 
