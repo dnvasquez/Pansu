@@ -9,6 +9,30 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function deepMerge(defaultValue, storedValue) {
+  if (Array.isArray(defaultValue)) {
+    return Array.isArray(storedValue) ? clone(storedValue) : clone(defaultValue);
+  }
+
+  if (isPlainObject(defaultValue)) {
+    const result = clone(defaultValue);
+    if (!isPlainObject(storedValue)) return result;
+
+    Object.keys(storedValue).forEach((key) => {
+      if (!Object.prototype.hasOwnProperty.call(defaultValue, key)) return;
+      result[key] = deepMerge(defaultValue[key], storedValue[key]);
+    });
+
+    return result;
+  }
+
+  return typeof storedValue === 'undefined' ? defaultValue : storedValue;
+}
+
 function getDefaultContent() {
   return JSON.parse(fs.readFileSync(DEFAULTS_PATH, 'utf8'));
 }
@@ -17,13 +41,7 @@ function mergeWithDefaults(stored) {
   const defaults = getDefaultContent();
   if (!stored || typeof stored !== 'object') return defaults;
 
-  const merged = clone(defaults);
-  Object.keys(defaults).forEach((section) => {
-    if (stored[section] && typeof stored[section] === 'object') {
-      merged[section] = stored[section];
-    }
-  });
-  return merged;
+  return deepMerge(defaults, stored);
 }
 
 function getCmsStore() {
