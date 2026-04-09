@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="images/logo_movil.png" type="image/png">
+    <title>Administracion Quienes Somos | PANSU</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <style>
+      body { margin:0; background:#f4f7f3; color:#1c1c1c; }
+      .admin-layout { min-height: 100vh; }
+      .admin-sidebar { background:#0f1b12; color:#dce6dc; position: fixed; top: 0; left: 0; bottom: 0; width: 260px; padding: 16px; overflow-y: auto; }
+      .admin-brand { font-weight:700; color:#fff; margin-bottom:12px; letter-spacing:.3px; }
+      .admin-nav { display:flex; flex-direction:column; gap:8px; }
+      .admin-nav a { display:block; text-decoration:none; color:#cfe2cf; padding:10px 12px; border-radius:8px; border:1px solid transparent; }
+      .admin-nav a:hover { background:#18281c; color:#fff; }
+      .admin-nav a.active { background:#1f3f24; color:#fff; border-color:#2f6a3a; }
+      .admin-content { margin-left: 260px; padding: 24px 20px 48px; min-width: 0; }
+      .admin-card { background:#fff; border:1px solid #dfeadf; border-radius:12px; padding:18px; box-shadow:0 8px 24px rgba(20,45,20,.08); }
+      .admin-title { font-weight:700; letter-spacing:.2px; }
+      .small-note { font-size:12px; color:#6a6a6a; }
+      .status { min-height: 24px; font-weight: 600; }
+      .preview { width:100%; max-height:180px; object-fit:cover; border-radius:10px; border:1px solid #e6ece6; background:#f7f7f7; }
+      @media (max-width: 991px) {
+        .admin-sidebar { width: 220px; }
+        .admin-content { margin-left: 220px; padding: 18px 14px 36px; }
+      }
+    </style>
+    <link rel="stylesheet" href="css/admin-theme.css">
+  </head>
+  <body>
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <div class="admin-brand">
+          <img class="admin-logo" src="images/logo_web_hor.png" alt="PANSU">
+          <p class="admin-brand-kicker">Panel de administracion</p>
+          <p class="admin-brand-title">CMS PANSU</p>
+        </div>
+        <nav class="admin-nav">
+          <a href="admin-header.html">Encabezado</a>
+          <a href="admin-porque-pansur.html">Por que PANSU</a>
+          <a href="admin-kpis.html">KPIs</a>
+          <a class="active" href="admin-quienes-somos.html">Quienes somos</a>
+          <a href="admin-contacto.html">Ajuste de Contacto</a>
+          <a href="admin-rrss.html">Redes sociales</a>
+          <a href="admin-faq.html">Preguntas frecuentes</a>
+          <a href="admin-cotizacion.html">Solicitud de cotización</a>
+          <a href="admin.html">Nuestros productos</a>
+          <a href="admin-calculadora.html">Calculadora de ahorro</a>
+          <a href="index.html#about">Volver al sitio</a>
+        </nav>
+      </aside>
+
+      <main class="admin-content">
+        <div class="admin-hero">
+          <p class="admin-eyebrow">Pansu CMS</p>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="h3 admin-title m-0">Panel de Quienes Somos</h1>
+          </div>
+        </div>
+        <p class="small-note mb-3">Edita textos e imagenes de la seccion Quienes Somos.</p>
+
+        <form id="about-cms-form">
+          <div class="admin-card mb-3">
+            <h2 class="h5">Textos</h2>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="about-title">Titulo</label>
+                <input class="form-control" id="about-title" type="text" maxlength="70" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="about-subtitle">Subtitulo</label>
+                <input class="form-control" id="about-subtitle" type="text" maxlength="110" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="about-description">Descripcion</label>
+                <textarea class="form-control" id="about-description" rows="4" maxlength="520" required></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <h2 class="h5">Imagenes</h2>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label" for="about-image-0">Imagen 1 (URL)</label>
+                <input class="form-control mb-2" id="about-image-0" type="url" maxlength="500" placeholder="https://... o images/...">
+                <input class="form-control mb-1" id="about-file-0" type="file" accept="image/*">
+                <p class="small-note mb-2">Subida desde archivo: maximo 1.2 MB</p>
+                <img class="preview" id="about-preview-0" alt="Vista previa 1">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="about-image-1">Imagen 2 (URL)</label>
+                <input class="form-control mb-2" id="about-image-1" type="url" maxlength="500" placeholder="https://... o images/...">
+                <input class="form-control mb-1" id="about-file-1" type="file" accept="image/*">
+                <p class="small-note mb-2">Subida desde archivo: maximo 1.2 MB</p>
+                <img class="preview" id="about-preview-1" alt="Vista previa 2">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="about-image-2">Imagen 3 (URL)</label>
+                <input class="form-control mb-2" id="about-image-2" type="url" maxlength="500" placeholder="https://... o images/...">
+                <input class="form-control mb-1" id="about-file-2" type="file" accept="image/*">
+                <p class="small-note mb-2">Subida desde archivo: maximo 1.2 MB</p>
+                <img class="preview" id="about-preview-2" alt="Vista previa 3">
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mt-4">
+            <button class="btn btn-success" type="submit">Guardar cambios</button>
+            <button class="btn btn-outline-danger" id="reset-btn" type="button">Restaurar por defecto</button>
+          </div>
+          <p class="status mt-3 mb-0" id="status"></p>
+        </form>
+      </main>
+    </div>
+
+    <script src="js/admin-charcount.js"></script>
+    <script src="js/admin-about.js"></script>
+  </body>
+</html>
+
+
