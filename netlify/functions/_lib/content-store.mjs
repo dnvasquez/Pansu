@@ -1,12 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { getStore } from '@netlify/blobs';
 
 const CONTENT_KEY = 'site-content';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const DEFAULTS_PATH = path.join(__dirname, '..', '..', '..', 'data', 'default-content.json');
+const DEFAULTS_PATH = path.resolve(process.cwd(), 'data', 'default-content.json');
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
