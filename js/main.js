@@ -133,22 +133,21 @@
     ]
   };
   const CHILE_REGIONS_COMUNAS = {
-    'Arica y Parinacota': ['Arica', 'Camarones', 'General Lagos', 'Putre'],
-    'Tarapaca': ['Iquique', 'Alto Hospicio', 'Pozo Almonte', 'Pica'],
-    'Antofagasta': ['Antofagasta', 'Calama', 'Mejillones', 'Tocopilla'],
-    'Atacama': ['Copiapo', 'Caldera', 'Vallenar', 'Chanaral'],
-    'Coquimbo': ['La Serena', 'Coquimbo', 'Ovalle', 'Illapel'],
-    'Valparaiso': ['Valparaiso', 'Vina del Mar', 'Quilpue', 'San Antonio'],
-    'Metropolitana de Santiago': ['Santiago', 'Puente Alto', 'Maipu', 'Las Condes', 'La Florida', 'Providencia'],
-    "O'Higgins": ['Rancagua', 'San Fernando', 'Rengo', 'Pichilemu'],
-    'Maule': ['Talca', 'Curico', 'Linares', 'Constitucion'],
-    'Nuble': ['Chillan', 'San Carlos', 'Bulnes', 'Quirihue'],
-    'Biobio': ['Concepcion', 'Los Angeles', 'Talcahuano', 'Coronel'],
-    'La Araucania': ['Temuco', 'Padre Las Casas', 'Villarrica', 'Angol'],
-    'Los Rios': ['Valdivia', 'La Union', 'Rio Bueno', 'Panguipulli'],
-    'Los Lagos': ['Puerto Montt', 'Osorno', 'Castro', 'Ancud'],
-    'Aysen': ['Coyhaique', 'Aysen', 'Chile Chico', 'Cochrane'],
-    'Magallanes y de la Antartica Chilena': ['Punta Arenas', 'Puerto Natales', 'Porvenir', 'Cabo de Hornos']
+    'Arica y Parinacota': ['Arica', 'Camarones', 'Putre', 'General Lagos'],
+    'Tarapaca': ['Alto Hospicio', 'Iquique', 'Huara', 'Camina', 'Colchane', 'Pica', 'Pozo Almonte'],
+    'Antofagasta': ['Tocopilla', 'Maria Elena', 'Calama', 'Ollague', 'San Pedro de Atacama', 'Antofagasta', 'Mejillones', 'Sierra Gorda', 'Taltal'],
+    'Atacama': ['Chanaral', 'Diego de Almagro', 'Copiapo', 'Caldera', 'Tierra Amarilla', 'Vallenar', 'Freirina', 'Huasco', 'Alto del Carmen'],
+    'Coquimbo': ['La Serena', 'La Higuera', 'Coquimbo', 'Andacollo', 'Vicuna', 'Paihuano', 'Ovalle', 'Rio Hurtado', 'Monte Patria', 'Combarbala', 'Punitaqui', 'Illapel', 'Salamanca', 'Los Vilos', 'Canela'],
+    'Valparaiso': ['La Ligua', 'Petorca', 'Cabildo', 'Zapallar', 'Papudo', 'Los Andes', 'San Esteban', 'Calle Larga', 'Rinconada', 'San Felipe', 'Putaendo', 'Santa Maria', 'Panquehue', 'Llaillay', 'Catemu', 'Quillota', 'La Cruz', 'Calera', 'Nogales', 'Hijuelas', 'Limache', 'Olmue', 'Valparaiso', 'Vina del Mar', 'Quintero', 'Puchuncavi', 'Quilpue', 'Villa Alemana', 'Casablanca', 'Concon', 'Juan Fernandez', 'San Antonio', 'Cartagena', 'El Tabo', 'El Quisco', 'Algarrobo', 'Santo Domingo', 'Isla de Pascua'],
+    "Libertador General Bernardo O'Higgins": ['Rancagua', 'Graneros', 'Mostazal', 'Codegua', 'Machali', 'Olivar', 'Requinoa', 'Rengo', 'Malloa', 'Quinta de Tilcoco', 'San Vicente', 'Pichidegua', 'Peumo', 'Coltauco', 'Coinco', 'Donihue', 'Las Cabras', 'San Fernando', 'Chimbarongo', 'Placilla', 'Nancagua', 'Chepica', 'Santa Cruz', 'Lolol', 'Pumanque', 'Palmilla', 'Peralillo', 'Pichilemu', 'Navidad', 'Litueche', 'La Estrella', 'Marchihue', 'Paredones'],
+    'Maule': ['Curico', 'Teno', 'Romeral', 'Molina', 'Sagrada Familia', 'Hualane', 'Licanten', 'Vichuquen', 'Rauco', 'Talca', 'Pelarco', 'Rio Claro', 'San Clemente', 'Maule', 'San Rafael', 'Empedrado', 'Pencahue', 'Constitucion', 'Curepto', 'Linares', 'Yerbas Buenas', 'Colbun', 'Longavi', 'Parral', 'Retiro', 'Villa Alegre', 'San Javier', 'Cauquenes', 'Pelluhue', 'Chanco'],
+    'Biobio': ['Chillan', 'San Carlos', 'Niquen', 'San Fabian', 'Coihueco', 'Pinto', 'San Ignacio', 'El Carmen', 'Yungay', 'Pemuco', 'Bulnes', 'Quillon', 'Ranquil', 'Portezuelo', 'Coelemu', 'Treguaco', 'Cobquecura', 'Quirihue', 'Ninhue', 'San Nicolas', 'Chillan Viejo', 'Alto Biobio', 'Los Angeles', 'Cabrero', 'Tucapel', 'Antuco', 'Quilleco', 'Santa Barbara', 'Quilaco', 'Mulchen', 'Negrete', 'Nacimiento', 'Laja', 'San Rosendo', 'Yumbel', 'Concepcion', 'Talcahuano', 'Penco', 'Tome', 'Florida', 'Hualpen', 'Hualqui', 'Santa Juana', 'Lota', 'Coronel', 'San Pedro de la Paz', 'Chiguayante', 'Lebu', 'Arauco', 'Curanilahue', 'Los Alamos', 'Canete', 'Contulmo', 'Tirua'],
+    'Araucania': ['Angol', 'Renaico', 'Collipulli', 'Lonquimay', 'Curacautin', 'Ercilla', 'Victoria', 'Traiguen', 'Lumaco', 'Puren', 'Los Sauces', 'Temuco', 'Lautaro', 'Perquenco', 'Vilcun', 'Cholchol', 'Cunco', 'Melipeuco', 'Curarrehue', 'Pucon', 'Villarrica', 'Freire', 'Pitrufquen', 'Gorbea', 'Loncoche', 'Tolten', 'Teodoro Schmidt', 'Saavedra', 'Carahue', 'Nueva Imperial', 'Galvarino', 'Padre las Casas'],
+    'Los Rios': ['Valdivia', 'Mariquina', 'Lanco', 'Mafil', 'Corral', 'Los Lagos', 'Panguipulli', 'Paillaco', 'La Union', 'Futrono', 'Rio Bueno', 'Lago Ranco'],
+    'Los Lagos': ['Osorno', 'San Pablo', 'Puyehue', 'Puerto Octay', 'Purranque', 'Rio Negro', 'San Juan de la Costa', 'Puerto Montt', 'Puerto Varas', 'Cochamo', 'Calbuco', 'Maullin', 'Los Muermos', 'Fresia', 'Llanquihue', 'Frutillar', 'Castro', 'Ancud', 'Quemchi', 'Dalcahue', 'Curaco de Velez', 'Quinchao', 'Puqueldon', 'Chonchi', 'Queilen', 'Quellon', 'Chaiten', 'Hualaihue', 'Futaleufu', 'Palena'],
+    'Aysen': ['Coyhaique', 'Lago Verde', 'Aysen', 'Cisnes', 'Guaitecas', 'Chile Chico', 'Rio Ibanez', 'Cochrane', "O'Higgins", 'Tortel'],
+    'Magallanes y Antartica Chilena': ['Natales', 'Torres del Paine', 'Punta Arenas', 'Rio Verde', 'Laguna Blanca', 'San Gregorio', 'Porvenir', 'Primavera', 'Timaukel', 'Cabo de Hornos', 'Antartica'],
+    'Metropolitana de Santiago': ['Santiago', 'Independencia', 'Conchali', 'Huechuraba', 'Recoleta', 'Providencia', 'Vitacura', 'Lo Barnechea', 'Las Condes', 'Nunoa', 'La Reina', 'Macul', 'Penalolen', 'La Florida', 'San Joaquin', 'La Granja', 'La Pintana', 'San Ramon', 'San Miguel', 'La Cisterna', 'El Bosque', 'Pedro Aguirre Cerda', 'Lo Espejo', 'Estacion Central', 'Cerrillos', 'Maipu', 'Quinta Normal', 'Lo Prado', 'Pudahuel', 'Cerro Navia', 'Renca', 'Quilicura', 'Colina', 'Lampa', 'Tiltil', 'Puente Alto', 'San Jose de Maipo', 'Pirque', 'San Bernardo', 'Buin', 'Paine', 'Calera de Tango', 'Melipilla', 'Maria Pinto', 'Curacavi', 'Alhue', 'San Pedro', 'Talagante', 'Penaflor', 'Isla de Maipo', 'El Monte', 'Padre Hurtado']
   };
   function defaultProductDescription(title) {
     const safeTitle = String(title || '').trim() || 'este producto';
