@@ -343,6 +343,35 @@
     updateActive();
   }
 
+  function initAnchorScroll() {
+    const anchorLinks = Array.from(document.querySelectorAll('a[href^="#"]'));
+    if (!anchorLinks.length) return;
+
+    function getOffset() {
+      const wrap = document.querySelector('.rd-navbar-wrap');
+      return wrap ? wrap.offsetHeight : 0;
+    }
+
+    anchorLinks.forEach((link) => {
+      link.addEventListener('click', function (e) {
+        const href = link.getAttribute('href');
+        if (!href || href === '#') return;
+
+        const target = document.querySelector(href);
+        if (!target) return;
+
+        e.preventDefault();
+
+        const top = href === '#home'
+          ? 0
+          : Math.max(0, window.scrollY + target.getBoundingClientRect().top - getOffset());
+
+        window.history.replaceState(null, '', href);
+        window.scrollTo({ top: top, behavior: 'smooth' });
+      });
+    });
+  }
+
   /* ── Form floating labels ──────────────────────────────── */
   function initFormLabels() {
     document.querySelectorAll('.form-wrap').forEach(wrap => {
@@ -1288,6 +1317,7 @@
       initPreloader();
       initSlider();
       initNavbar();
+      initAnchorScroll();
       initFormLabels();
       initParallax();
       initCarousel();
