@@ -4,20 +4,20 @@
 
 [[redirects]]
   from = "/api/login"
-  to = "/.netlify/functions/login"
+  to = "/.netlify/functions/login-v2"
   status = 200
 
 [[redirects]]
   from = "/api/logout"
-  to = "/.netlify/functions/logout"
+  to = "/.netlify/functions/logout-v2"
   status = 200
 
 [[redirects]]
   from = "/api/session"
-  to = "/.netlify/functions/session"
+  to = "/.netlify/functions/session-v2"
   status = 200
 
 [[redirects]]
   from = "/api/content"
-  to = "/.netlify/functions/content"
+  to = "/.netlify/functions/content-v2"
   status = 200
