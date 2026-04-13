@@ -4,7 +4,11 @@ const COOKIE_NAME = 'cms_session';
 const MAX_AGE_SEC = 8 * 60 * 60;
 
 function getSecret() {
-  return process.env.CMS_SECRET || 'change-this-secret-in-netlify';
+  const secret = process.env.CMS_SECRET;
+  if (!secret) {
+    throw new Error('CMS_SECRET not configured');
+  }
+  return secret;
 }
 
 function base64url(input) {

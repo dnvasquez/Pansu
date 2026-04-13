@@ -4,6 +4,7 @@
   var SECTION = 'quote';
   var KEY = 'pansur_quote_cms_v1';
   var EMAIL_MAX = 120;
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   var DEFAULTS = {
     destinationEmail: 'ventas@pansur.cl'
   };
@@ -42,7 +43,7 @@
       e.preventDefault();
       var email = (emailInput.value || '').trim().slice(0, EMAIL_MAX);
       emailInput.value = email;
-      if (!email) {
+      if (!EMAIL_RE.test(email)) {
         setStatus('Debes ingresar un correo destino valido.', false);
         return;
       }

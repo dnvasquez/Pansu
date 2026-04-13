@@ -8,8 +8,8 @@ const HOST = process.env.HOST || '0.0.0.0';
 const PORT = Number(process.env.PORT || 3000);
 const ROOT = __dirname;
 
-const CMS_USER = process.env.CMS_USER || 'admin';
-const CMS_PASS = process.env.CMS_PASS || '123456';
+const CMS_USER = process.env.CMS_USER || '';
+const CMS_PASS = process.env.CMS_PASS || '';
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 
 const sessions = new Map();
@@ -109,6 +109,9 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname === '/api/login' && method === 'POST') {
     try {
+      if (!CMS_USER || !CMS_PASS) {
+        return send(res, 500, JSON.stringify({ ok: false, message: 'CMS no configurado' }), 'application/json; charset=utf-8');
+      }
       const raw = await readBody(req);
       const payload = JSON.parse(raw || '{}');
       const username = String(payload.username || '');

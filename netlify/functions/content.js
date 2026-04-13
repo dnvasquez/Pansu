@@ -22,7 +22,12 @@ exports.handler = async function (event) {
     return json(405, { ok: false, message: 'Metodo no permitido' });
   }
 
-  const session = getSession(event);
+  let session = null;
+  try {
+    session = getSession(event);
+  } catch (err) {
+    return json(500, { ok: false, message: 'CMS no configurado' });
+  }
   if (!session) {
     return json(401, { ok: false, message: 'Sesion no valida' });
   }

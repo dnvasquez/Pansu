@@ -21,7 +21,12 @@ export default async function handler(request) {
     return json({ ok: false, message: 'Metodo no permitido' }, 405);
   }
 
-  const session = getSession(request);
+  let session = null;
+  try {
+    session = getSession(request);
+  } catch {
+    return json({ ok: false, message: 'CMS no configurado' }, 500);
+  }
   if (!session) {
     return json({ ok: false, message: 'Sesion no valida' }, 401);
   }

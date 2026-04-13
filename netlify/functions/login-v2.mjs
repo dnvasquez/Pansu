@@ -32,8 +32,12 @@ export default async function handler(request) {
 
   const username = String(body.username || '').trim();
   const password = String(body.password || '');
-  const expectedUser = process.env.CMS_USER || 'admin';
-  const expectedPass = process.env.CMS_PASS || '123456';
+  const expectedUser = process.env.CMS_USER || '';
+  const expectedPass = process.env.CMS_PASS || '';
+
+  if (!expectedUser || !expectedPass) {
+    return json({ ok: false, message: 'CMS no configurado' }, 500);
+  }
 
   if (username !== expectedUser || password !== expectedPass) {
     return json({ ok: false, message: 'Credenciales invalidas' }, 401);

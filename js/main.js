@@ -15,6 +15,8 @@
   const FAQ_CMS_KEY = 'pansur_faq_cms_v1';
   const WHY_CMS_KEY = 'pansur_why_cms_v1';
   const KPIS_CMS_KEY = 'pansur_kpis_cms_v1';
+  const SAFE_HREF_RE = /^(?:https?:|mailto:|tel:|#|\/(?!\/))/i;
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const DEFAULT_PRODUCTS_CMS = {
     products: [
       { id: 'p1', title: 'NeON 2 315W', image: 'images/product-01-370x300.jpg', description: 'Panel solar monocristalino de alta eficiencia para instalaciones residenciales, con excelente rendimiento en distintas condiciones climaticas.' },
@@ -853,14 +855,34 @@
     }
     if (!parsed || typeof parsed !== 'object') return DEFAULT_QUOTE_CMS;
     const email = String(parsed.destinationEmail || '').trim();
-    return { destinationEmail: email || DEFAULT_QUOTE_CMS.destinationEmail };
+    return { destinationEmail: EMAIL_RE.test(email) ? email : DEFAULT_QUOTE_CMS.destinationEmail };
+  }
+
+  async function fetchQuoteCMSData() {
+    try {
+      const response = await fetch('/api/content', { credentials: 'same-origin' });
+      if (!response.ok) return null;
+      const data = await response.json();
+      const email = String(data && data.content && data.content.quote && data.content.quote.destinationEmail || '').trim();
+      if (!EMAIL_RE.test(email)) return null;
+      return { destinationEmail: email };
+    } catch (err) {
+      return null;
+    }
   }
 
   function initQuoteFormsCMS() {
     const forms = Array.from(document.querySelectorAll('[data-quote-form]'));
     if (!forms.length) return;
-    const quoteData = getQuoteCMSData();
+    let quoteData = getQuoteCMSData();
     const regions = Object.keys(CHILE_REGIONS_COMUNAS);
+
+    function applyDestination(email) {
+      forms.forEach((form) => {
+        const destination = form.querySelector('[data-quote-destination]');
+        if (destination) destination.value = email;
+      });
+    }
 
     function fillRegions(regionSelect) {
       regionSelect.innerHTML = '<option value="">Region de Chile</option>' +
@@ -887,10 +909,9 @@
     }
 
     forms.forEach(form => {
-      const destination = form.querySelector('[data-quote-destination]');
       const regionSelect = form.querySelector('[data-quote-region]');
       const comunaSelect = form.querySelector('[data-quote-comuna]');
-      if (destination) destination.value = quoteData.destinationEmail;
+      applyDestination(quoteData.destinationEmail);
 
       if (regionSelect && comunaSelect) {
         fillRegions(regionSelect);
@@ -963,6 +984,12 @@
         }
       });
     });
+
+    fetchQuoteCMSData().then((serverQuote) => {
+      if (!serverQuote || !serverQuote.destinationEmail) return;
+      quoteData = serverQuote;
+      applyDestination(quoteData.destinationEmail);
+    }).catch(function () {});
   }
 
   function initMobileQuoteCTA() {
@@ -981,6 +1008,12 @@
   }
 
   function getSocialCMSData() {
+    function sanitizeHref(value) {
+      const href = String(value || '').trim();
+      if (!href) return '#';
+      return SAFE_HREF_RE.test(href) ? href : '#';
+    }
+
     function sanitizeLink(item, fallback) {
       item = item || {};
       fallback = fallback || {};
@@ -988,7 +1021,7 @@
         key: String(item.key || fallback.key || ''),
         label: String(item.label || fallback.label || '').trim(),
         iconClass: String(item.iconClass || fallback.iconClass || '').trim(),
-        href: String(item.href || '').trim() || '#',
+        href: sanitizeHref(item.href),
         enabled: Boolean(item.enabled)
       };
     }

@@ -4,6 +4,7 @@
   var SECTION = 'social';
   var KEY = 'pansur_social_cms_v1';
   var LINK_MAX = 300;
+  var SAFE_HREF_RE = /^(?:https?:|mailto:|tel:|#|\/(?!\/))/i;
   var DEFAULTS = {
     links: [
       { key: 'facebook', label: 'Facebook', iconClass: 'fa-brands fa-facebook-f', href: '#', enabled: true },
@@ -18,6 +19,12 @@
   function byId(id) { return document.getElementById(id); }
   function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
 
+  function sanitizeHref(value) {
+    var href = String(value || '').trim();
+    if (!href) return '#';
+    return SAFE_HREF_RE.test(href) ? href : '#';
+  }
+
   function normalize(raw) {
     if (!raw || typeof raw !== 'object' || !Array.isArray(raw.links)) return null;
     var links = raw.links.map(function (item, idx) {
@@ -26,7 +33,7 @@
         key: String(item.key || fallback.key || ''),
         label: String(item.label || fallback.label || '').trim(),
         iconClass: String(item.iconClass || fallback.iconClass || '').trim(),
-        href: (String(item.href || '').trim().slice(0, LINK_MAX) || '#'),
+        href: sanitizeHref(String(item.href || '').trim().slice(0, LINK_MAX)),
         enabled: Boolean(item.enabled)
       };
     }).filter(function (item) { return item.iconClass; });
@@ -69,7 +76,7 @@
       var linkInput = row.querySelector('.social-link');
       var enabledInput = row.querySelector('.social-enabled');
       linkInput.addEventListener('input', function () {
-        state.links[idx].href = linkInput.value.slice(0, LINK_MAX);
+        state.links[idx].href = sanitizeHref(linkInput.value.slice(0, LINK_MAX));
         linkInput.value = state.links[idx].href;
       });
       enabledInput.addEventListener('change', function () {
@@ -107,7 +114,7 @@
             key: item.key,
             label: item.label,
             iconClass: item.iconClass,
-            href: String(item.href || '').trim().slice(0, LINK_MAX) || '#',
+            href: sanitizeHref(String(item.href || '').trim().slice(0, LINK_MAX)),
             enabled: Boolean(item.enabled)
           };
         })
