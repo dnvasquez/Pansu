@@ -72,26 +72,20 @@
         '<label class="form-check form-switch admin-visibility-switch">' +
           '<input class="form-check-input" type="checkbox" ' + (enabled ? 'checked' : '') + ' aria-label="' + escapeHtml(label) + '">' +
         '</label>' +
-        '<span class="admin-visibility-state" data-visibility-status>' + (enabled ? 'Visible' : 'Oculta') + '</span>' +
       '</div>';
 
     var card = container.querySelector('.admin-visibility');
-    var status = container.querySelector('[data-visibility-status]');
     var input = container.querySelector('.form-check-input');
 
     input.addEventListener('change', function () {
       state[sectionKey] = input.checked;
       card.classList.toggle('is-on', input.checked);
       card.classList.toggle('is-off', !input.checked);
-      status.textContent = input.checked ? 'Visible' : 'Oculta';
-      status.classList.toggle('is-on', input.checked);
-      status.classList.toggle('is-off', !input.checked);
       saveData().catch(function () {
         state[sectionKey] = !input.checked;
         input.checked = state[sectionKey];
         card.classList.toggle('is-on', input.checked);
         card.classList.toggle('is-off', !input.checked);
-        status.textContent = input.checked ? 'Visible' : 'Oculta';
         setStatus('No se pudo guardar la visibilidad.', false, container);
       });
     });
