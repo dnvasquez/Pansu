@@ -141,24 +141,32 @@ body {
 }
 
 .admin-hero-badge {
-  flex: 0 0 272px;
+  flex: 0 0 260px;
   max-width: 100%;
 }
 
-.admin-hero-badge-card {
-  height: 100%;
+.admin-visibility {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 76px;
   padding: 16px 18px;
   border: 1px solid rgba(49, 83, 58, 0.14);
   border-radius: 18px;
-  background: linear-gradient(135deg, rgba(255, 186, 8, 0.18) 0%, rgba(255, 255, 255, 0.9) 62%);
+  background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 14px 28px rgba(16, 30, 20, 0.08);
 }
 
-.admin-hero-badge-card.is-off {
-  background: linear-gradient(135deg, rgba(97, 114, 100, 0.1) 0%, rgba(255, 255, 255, 0.9) 62%);
+.admin-visibility.is-off {
+  background: linear-gradient(135deg, rgba(97, 114, 100, 0.08) 0%, rgba(255, 255, 255, 0.94) 62%);
 }
 
-.admin-hero-badge-kicker {
+.admin-visibility-copy {
+  min-width: 0;
+}
+
+.admin-visibility-kicker {
   margin: 0 0 4px;
   color: var(--admin-text-muted);
   font-size: 11px;
@@ -167,65 +175,51 @@ body {
   text-transform: uppercase;
 }
 
-.admin-hero-badge-title {
+.admin-visibility-label {
   margin: 0;
   color: var(--admin-ink);
   font-family: 'Oswald', sans-serif;
-  font-size: 22px;
+  font-size: 18px;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
-.admin-hero-badge-copy {
-  margin: 8px 0 0;
-  color: var(--admin-text-muted);
-  font-size: 13px;
-  line-height: 1.45;
+.admin-visibility-switch {
+  margin: 0;
+  padding-left: 0;
 }
 
-.admin-hero-badge-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 14px;
-}
-
-.admin-hero-badge-status {
+.admin-visibility-state {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 12px;
+  justify-content: center;
+  min-width: 72px;
+  padding: 6px 10px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
-.admin-hero-badge-status.is-on {
+.admin-visibility-state.is-on {
   color: #24572f;
   background: rgba(49, 83, 58, 0.1);
 }
 
-.admin-hero-badge-status.is-off {
+.admin-visibility-state.is-off {
   color: #7b5b1a;
   background: rgba(255, 186, 8, 0.14);
 }
 
-.admin-hero-badge .form-check {
-  margin: 0;
-  padding-left: 0;
-}
-
-.admin-hero-badge .form-check-input {
+.admin-visibility .form-check-input {
   width: 2.6em;
   height: 1.35em;
   margin: 0;
   cursor: pointer;
 }
 
-.admin-hero-badge .form-check-input:checked {
+.admin-visibility .form-check-input:checked {
   background-color: var(--admin-primary-dark);
   border-color: var(--admin-primary-dark);
 }
@@ -416,6 +410,10 @@ textarea.form-control {
   .admin-hero-badge {
     width: 100%;
     flex-basis: auto;
+  }
+
+  .admin-visibility {
+    width: 100%;
   }
 
   .admin-logo {

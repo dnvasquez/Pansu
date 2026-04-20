@@ -61,23 +61,21 @@
   function renderTicket(container) {
     var sectionKey = container.getAttribute('data-section-visibility-ticket');
     var label = container.getAttribute('data-section-label') || sectionKey;
-    var helpText = container.getAttribute('data-section-help') || 'Activa o desactiva esta seccion sin salir del CMS.';
     var enabled = state[sectionKey] !== false;
 
     container.innerHTML = '' +
-      '<div class="admin-hero-badge-card ' + (enabled ? 'is-on' : 'is-off') + '">' +
-        '<p class="admin-hero-badge-kicker">Visibilidad de seccion</p>' +
-        '<h2 class="admin-hero-badge-title">' + escapeHtml(label) + '</h2>' +
-        '<p class="admin-hero-badge-copy">' + escapeHtml(helpText) + '</p>' +
-        '<div class="admin-hero-badge-row">' +
-          '<span class="admin-hero-badge-status ' + (enabled ? 'is-on' : 'is-off') + '" data-visibility-status>' + (enabled ? 'Visible' : 'Oculta') + '</span>' +
-          '<div class="form-check form-switch">' +
-            '<input class="form-check-input" type="checkbox" ' + (enabled ? 'checked' : '') + ' aria-label="' + escapeHtml(label) + '">' +
-          '</div>' +
+      '<div class="admin-visibility ' + (enabled ? 'is-on' : 'is-off') + '">' +
+        '<div class="admin-visibility-copy">' +
+          '<p class="admin-visibility-kicker">Visibilidad</p>' +
+          '<h2 class="admin-visibility-label">' + escapeHtml(label) + '</h2>' +
         '</div>' +
+        '<label class="form-check form-switch admin-visibility-switch">' +
+          '<input class="form-check-input" type="checkbox" ' + (enabled ? 'checked' : '') + ' aria-label="' + escapeHtml(label) + '">' +
+        '</label>' +
+        '<span class="admin-visibility-state" data-visibility-status>' + (enabled ? 'Visible' : 'Oculta') + '</span>' +
       '</div>';
 
-    var card = container.querySelector('.admin-hero-badge-card');
+    var card = container.querySelector('.admin-visibility');
     var status = container.querySelector('[data-visibility-status]');
     var input = container.querySelector('.form-check-input');
 

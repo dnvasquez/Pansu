@@ -16,7 +16,7 @@
   };
 
   function redirectToLogin() {
-    var next = encodeURIComponent(window.location.pathname || '/admin.html');
+    var next = encodeURIComponent(window.location.pathname || '/admin-header.html');
     window.location.href = '/login.html?next=' + next;
   }
 
