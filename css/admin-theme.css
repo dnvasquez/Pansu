@@ -144,6 +144,7 @@ body {
   flex: 0 0 auto;
   display: flex;
   justify-content: flex-end;
+  margin-left: auto;
   max-width: 100%;
 }
 
@@ -152,8 +153,8 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 52px;
-  padding: 8px 12px 8px 14px;
+  min-height: 46px;
+  padding: 7px 12px 7px 14px;
   border: 1px solid rgba(49, 83, 58, 0.12);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.82);
@@ -164,29 +165,14 @@ body {
   background: rgba(255, 255, 255, 0.74);
 }
 
-.admin-visibility-copy {
-  min-width: 0;
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.admin-visibility-kicker {
-  margin: 0;
-  color: var(--admin-text-muted);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
 .admin-visibility-label {
   margin: 0;
   color: var(--admin-ink);
   font-family: 'Oswald', sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   letter-spacing: 0.02em;
-  text-transform: uppercase;
+  text-transform: none;
+  white-space: nowrap;
 }
 
 .admin-visibility-switch {
@@ -393,6 +379,7 @@ textarea.form-control {
     width: 100%;
     flex-basis: auto;
     justify-content: flex-start;
+    margin-left: 0;
   }
 
   .admin-visibility {

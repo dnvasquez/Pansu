@@ -60,17 +60,13 @@
 
   function renderTicket(container) {
     var sectionKey = container.getAttribute('data-section-visibility-ticket');
-    var label = container.getAttribute('data-section-label') || sectionKey;
     var enabled = state[sectionKey] !== false;
 
     container.innerHTML = '' +
       '<div class="admin-visibility ' + (enabled ? 'is-on' : 'is-off') + '">' +
-        '<div class="admin-visibility-copy">' +
-          '<p class="admin-visibility-kicker">Visibilidad</p>' +
-          '<h2 class="admin-visibility-label">' + escapeHtml(label) + '</h2>' +
-        '</div>' +
+        '<span class="admin-visibility-label">Visibilidad</span>' +
         '<label class="form-check form-switch admin-visibility-switch">' +
-          '<input class="form-check-input" type="checkbox" ' + (enabled ? 'checked' : '') + ' aria-label="' + escapeHtml(label) + '">' +
+          '<input class="form-check-input" type="checkbox" ' + (enabled ? 'checked' : '') + ' aria-label="Visibilidad">' +
         '</label>' +
       '</div>';
 
