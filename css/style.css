@@ -355,6 +355,15 @@ p { margin: 0; }
   overflow: hidden;
 }
 
+.cms-quote-hidden > [class*="col-lg-6"]:first-child {
+  flex: 0 0 100%;
+  max-width: 100%;
+}
+
+.cms-quote-hidden > [class*="col-lg-6"]:last-child {
+  display: none !important;
+}
+
 .swiper-wrapper { position: absolute; inset: 0; }
 
 .swiper-slide {

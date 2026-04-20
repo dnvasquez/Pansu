@@ -36,10 +36,10 @@
                   <div class="rd-navbar-nav-wrap">
                     <ul class="rd-navbar-nav">
                       <li class="active"><a href="#home">Inicio</a></li>
-                      <li><a href="#about">Nosotros</a></li>
-                      <li><a href="#products">Productos</a></li>
-                      <li><a href="#faq">FAQ</a></li>
-                      <li><a href="#contacts">Contacto</a></li>
+                      <li data-cms-nav-section="about"><a href="#about">Nosotros</a></li>
+                      <li data-cms-nav-section="products"><a href="#products">Productos</a></li>
+                      <li data-cms-nav-section="faq"><a href="#faq">FAQ</a></li>
+                      <li data-cms-nav-section="contacts"><a href="#contacts">Contacto</a></li>
                     </ul>
                   </div>
                 </div>
@@ -52,7 +52,7 @@
         </div>
       </header>
 
-      <section>
+      <section data-cms-section="header">
         <div class="swiper-container swiper-slider" data-autoplay="3000">
           <div class="swiper-wrapper">
             <div class="swiper-slide" data-header-slide="0" data-slide-bg="images/slide-03.jpg" style="background-position: 80% center"><div class="swiper-slide-caption"></div></div>
@@ -71,7 +71,7 @@
                   </div>
                   <div class="offset-top-20 offset-lg-top-50 view-animate zoomInSmall delay-2 duration-1"><a class="btn btn-primary" data-header-hero-button href="#about">Mas informacion</a></div>
                 </div>
-                <div class="col-lg-6 col-xl-5 d-none d-lg-block">
+                <div class="col-lg-6 col-xl-5 d-none d-lg-block" data-cms-section="quote">
                   <div class="bg-default section-form-slider">
                     <h5>Solicita una cotizacion para una instalacion de paneles solares residencial o comercial</h5>
                     <form class="rd-mailform text-center offset-top-30" data-quote-form data-form-output="form-output-global" data-form-type="contact" method="post" action="#">
@@ -116,7 +116,7 @@
         </div>
       </section>
 
-      <section class="section-top-65 section-md-top-105" id="about">
+      <section class="section-top-65 section-md-top-105" id="about" data-cms-section="about">
         <div class="container">
           <h3 data-about-title>Quienes somos</h3>
           <p class="font-size-12" data-about-subtitle>Equipo de especialistas en energia alternativa</p>
@@ -136,7 +136,7 @@
         </div>
       </section>
 
-      <section>
+      <section data-cms-section="why">
         <div class="parallax-container" data-parallax-img="images/parallax-04.jpg">
           <div class="parallax-content">
             <div class="container section-75 section-md-top-135 section-md-bottom-183 text-center">
@@ -182,7 +182,7 @@
         </div>
       </section>
 
-      <section class="section-60 section-md-90 kpi-section" id="kpis">
+      <section class="section-60 section-md-90 kpi-section" id="kpis" data-cms-section="kpis">
         <div class="container">
           <div class="kpi-shell">
             <p class="kpi-eyebrow">Resultados PANSU</p>
@@ -221,7 +221,7 @@
         </div>
       </section>
 
-      <section class="savings-section section-60 section-md-90">
+      <section class="savings-section section-60 section-md-90" data-cms-section="savings">
         <div class="container">
           <div class="row align-items-center row-50">
             <div class="col-lg-6 text-start">
@@ -255,7 +255,7 @@
         </div>
       </section>
 
-      <section class="section-60 section-md-90" id="products">
+      <section class="section-60 section-md-90" id="products" data-cms-section="products">
         <div class="container">
           <h3><span>Nuestros </span><span class="text-primary">productos</span></h3>
           <div class="row row-30 justify-content-sm-center text-md-start" id="featured-products-grid">
@@ -273,9 +273,9 @@
         </div>
       </section>
 
-      <div class="container"><hr class="hr"></div>
+      <div class="container" data-cms-section="faq-divider"><hr class="hr"></div>
 
-      <section class="section-60 section-md-90" id="faq">
+      <section class="section-60 section-md-90" id="faq" data-cms-section="faq">
         <div class="container">
           <h3><span>Preguntas </span><span class="text-primary">frecuentes</span></h3>
           <p class="font-size-12 offset-top-10" style="max-width:760px;margin:0 auto;">Resuelve dudas comunes antes de instalar tu sistema solar con PANSU.</p>
@@ -294,7 +294,7 @@
         </div>
       </section>
 
-      <section class="section-top-75 section-md-top-135" id="contacts">
+      <section class="section-top-75 section-md-top-135" id="contacts" data-cms-section="contact">
         <div class="container">
           <h3 data-contact-title>Contactanos</h3>
           <hr class="hr offset-top-35">
@@ -317,7 +317,7 @@
                   <dl class="dl-horizontal-variant-1 offset-sm-top-25 text-md-start"><dt class="fw-bold text-dark">Telefono:</dt><dd><a class="text-base text-regular" data-contact-main-office-phone-link href="tel:#"><span data-contact-main-office-phone-text>555-376-7872</span></a></dd></dl>
                   <dl class="dl-horizontal-variant-1 text-md-start"><dt class="fw-bold text-dark">Fax:</dt><dd><a class="text-base text-regular" data-contact-main-office-fax-link href="tel:#"><span data-contact-main-office-fax-text>555-376-7873</span></a></dd></dl>
                 </div>
-                <div class="contact-cta-card text-start">
+                <div class="contact-cta-card text-start" data-cms-section="quote">
                   <h5 data-contact-form-title>Solicita una cotizacion para una instalacion de paneles solares residencial o comercial</h5>
                   <p class="font-size-12 offset-top-10">Para solicitar una cotización, envíanos un mensaje.</p>
                   <a class="btn btn-primary offset-top-20" data-quote-cta href="#home">FORMULARIO DE COTIZACION</a>
@@ -373,6 +373,7 @@
               <ul class="list-inline list-inline-xs" data-social-links>
                 <li><a class="icon icon-circle icon-dark icon-xs" href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a></li>
                 <li><a class="icon icon-circle icon-dark icon-xs" href="#" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a></li>
+                <li><a class="icon icon-circle icon-dark icon-xs" href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a></li>
                 <li><a class="icon icon-circle icon-dark icon-xs" href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a></li>
                 <li><a class="icon icon-circle icon-dark icon-xs" href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a></li>
               </ul>

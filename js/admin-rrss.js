@@ -9,6 +9,7 @@
     links: [
       { key: 'facebook', label: 'Facebook', iconClass: 'fa-brands fa-facebook-f', href: '#', enabled: true },
       { key: 'twitter', label: 'X (Twitter)', iconClass: 'fa-brands fa-x-twitter', href: '#', enabled: true },
+      { key: 'instagram', label: 'Instagram', iconClass: 'fa-brands fa-instagram', href: '#', enabled: true },
       { key: 'youtube', label: 'YouTube', iconClass: 'fa-brands fa-youtube', href: '#', enabled: true },
       { key: 'linkedin', label: 'LinkedIn', iconClass: 'fa-brands fa-linkedin-in', href: '#', enabled: true }
     ]
@@ -26,17 +27,36 @@
   }
 
   function normalize(raw) {
-    if (!raw || typeof raw !== 'object' || !Array.isArray(raw.links)) return null;
-    var links = raw.links.map(function (item, idx) {
-      var fallback = DEFAULTS.links[idx] || {};
+    if (!raw || typeof raw !== 'object') return null;
+    var rawLinks = Array.isArray(raw.links) ? raw.links : [];
+    var byKey = {};
+    rawLinks.forEach(function (item) {
+      if (!item || typeof item !== 'object') return;
+      var key = String(item.key || '').trim();
+      if (!key) return;
+      byKey[key] = item;
+    });
+    var links = DEFAULTS.links.map(function (fallback) {
+      var item = byKey[fallback.key] || {};
       return {
         key: String(item.key || fallback.key || ''),
         label: String(item.label || fallback.label || '').trim(),
         iconClass: String(item.iconClass || fallback.iconClass || '').trim(),
-        href: sanitizeHref(String(item.href || '').trim().slice(0, LINK_MAX)),
-        enabled: Boolean(item.enabled)
+        href: sanitizeHref(String(item.href || fallback.href || '').trim().slice(0, LINK_MAX)),
+        enabled: Boolean(typeof item.enabled === 'undefined' ? fallback.enabled : item.enabled)
       };
     }).filter(function (item) { return item.iconClass; });
+    rawLinks.forEach(function (item) {
+      var key = String(item && item.key || '').trim();
+      if (!key || DEFAULTS.links.some(function (fallback) { return fallback.key === key; })) return;
+      links.push({
+        key: key,
+        label: String(item.label || key).trim(),
+        iconClass: String(item.iconClass || '').trim(),
+        href: sanitizeHref(String(item.href || '').trim().slice(0, LINK_MAX)),
+        enabled: Boolean(item.enabled)
+      });
+    });
     if (!links.length) return null;
     return { links: links };
   }

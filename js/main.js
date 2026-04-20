@@ -12,6 +12,7 @@
   const HEADER_CMS_KEY = 'pansur_header_cms_v1';
   const SAVINGS_CMS_KEY = 'pansur_savings_cms_v1';
   const SOCIAL_CMS_KEY = 'pansur_social_cms_v1';
+  const VISIBILITY_CMS_KEY = 'pansur_visibility_cms_v1';
   const FAQ_CMS_KEY = 'pansur_faq_cms_v1';
   const WHY_CMS_KEY = 'pansur_why_cms_v1';
   const KPIS_CMS_KEY = 'pansur_kpis_cms_v1';
@@ -86,9 +87,22 @@
     links: [
       { key: 'facebook', label: 'Facebook', iconClass: 'fa-brands fa-facebook-f', href: '#', enabled: true },
       { key: 'twitter', label: 'X (Twitter)', iconClass: 'fa-brands fa-x-twitter', href: '#', enabled: true },
+      { key: 'instagram', label: 'Instagram', iconClass: 'fa-brands fa-instagram', href: '#', enabled: true },
       { key: 'youtube', label: 'YouTube', iconClass: 'fa-brands fa-youtube', href: '#', enabled: true },
       { key: 'linkedin', label: 'LinkedIn', iconClass: 'fa-brands fa-linkedin-in', href: '#', enabled: true }
     ]
+  };
+  const DEFAULT_VISIBILITY_CMS = {
+    header: true,
+    why: true,
+    kpis: true,
+    about: true,
+    savings: true,
+    products: true,
+    faq: true,
+    contact: true,
+    quote: true,
+    social: true
   };
   const DEFAULT_FAQ_CMS = {
     items: [
@@ -154,6 +168,56 @@
   function defaultProductDescription(title) {
     const safeTitle = String(title || '').trim() || 'este producto';
     return 'Descripcion general de ' + safeTitle + '. Puedes editar este texto desde el panel CMS.';
+  }
+
+  function normalizeSocialLinks(rawLinks) {
+    function sanitizeHref(value) {
+      const href = String(value || '').trim();
+      if (!href) return '#';
+      return SAFE_HREF_RE.test(href) ? href : '#';
+    }
+
+    const raw = Array.isArray(rawLinks) ? rawLinks : [];
+    const byKey = new Map();
+    raw.forEach((item) => {
+      if (!item || typeof item !== 'object') return;
+      const key = String(item.key || '').trim();
+      if (!key) return;
+      byKey.set(key, item);
+    });
+
+    const merged = DEFAULT_SOCIAL_CMS.links.map((fallback) => {
+      const item = byKey.get(fallback.key) || {};
+      return {
+        key: String(item.key || fallback.key || ''),
+        label: String(item.label || fallback.label || '').trim(),
+        iconClass: String(item.iconClass || fallback.iconClass || '').trim(),
+        href: sanitizeHref(item.href || fallback.href || '#'),
+        enabled: Boolean(typeof item.enabled === 'undefined' ? fallback.enabled : item.enabled)
+      };
+    });
+
+    raw.forEach((item) => {
+      const key = String(item && item.key || '').trim();
+      if (!key || DEFAULT_SOCIAL_CMS.links.some((fallback) => fallback.key === key)) return;
+      merged.push({
+        key: key,
+        label: String(item.label || key).trim(),
+        iconClass: String(item.iconClass || '').trim(),
+        href: sanitizeHref(item.href || '#'),
+        enabled: Boolean(item.enabled)
+      });
+    });
+
+    return merged.filter((item) => item.iconClass);
+  }
+
+  function normalizeVisibility(raw) {
+    if (!raw || typeof raw !== 'object') return DEFAULT_VISIBILITY_CMS;
+    return Object.keys(DEFAULT_VISIBILITY_CMS).reduce((acc, key) => {
+      acc[key] = typeof raw[key] === 'undefined' ? DEFAULT_VISIBILITY_CMS[key] : Boolean(raw[key]);
+      return acc;
+    }, {});
   }
 
   /* ── Preloader ─────────────────────────────────────────── */
@@ -251,6 +315,76 @@
     });
   }
 
+  function getVisibilityCMSData() {
+    function normalize(raw) {
+      if (!raw || typeof raw !== 'object') return null;
+      return normalizeVisibility(raw);
+    }
+
+    let parsed = null;
+    try {
+      parsed = JSON.parse(localStorage.getItem(VISIBILITY_CMS_KEY) || 'null');
+    } catch (err) {
+      parsed = null;
+    }
+    return normalize(parsed) || DEFAULT_VISIBILITY_CMS;
+  }
+
+  function initSectionVisibility() {
+    const data = getVisibilityCMSData();
+    const sectionMap = {
+      header: ['[data-cms-section="header"]'],
+      why: ['[data-cms-section="why"]'],
+      kpis: ['[data-cms-section="kpis"]'],
+      savings: ['[data-cms-section="savings"]'],
+      products: ['[data-cms-section="products"]'],
+      about: ['[data-cms-section="about"]'],
+      contact: ['[data-cms-section="contact"]'],
+      faq: ['[data-cms-section="faq"]', '[data-cms-section="faq-divider"]'],
+      quote: ['[data-cms-section="quote"]', '#quoteMobileModal', '[data-quote-form]', '[data-quote-cta]'],
+      social: ['[data-social-links]']
+    };
+
+    Object.keys(sectionMap).forEach((key) => {
+      const visible = data[key] !== false;
+      sectionMap[key].forEach((selector) => {
+        document.querySelectorAll(selector).forEach((el) => {
+          el.hidden = !visible;
+          el.setAttribute('aria-hidden', visible ? 'false' : 'true');
+        });
+      });
+    });
+
+    const quoteCard = document.querySelector('[data-cms-section="quote-card"]');
+    if (quoteCard) {
+      const visible = data.quote !== false;
+      quoteCard.hidden = !visible;
+      quoteCard.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    }
+
+    const visibleNav = {
+      about: data.about !== false,
+      products: data.products !== false,
+      faq: data.faq !== false,
+      contacts: data.contact !== false
+    };
+    document.querySelectorAll('[data-cms-nav-section]').forEach((item) => {
+      const key = item.getAttribute('data-cms-nav-section');
+      if (!Object.prototype.hasOwnProperty.call(visibleNav, key)) return;
+      item.hidden = !visibleNav[key];
+      item.setAttribute('aria-hidden', visibleNav[key] ? 'false' : 'true');
+    });
+
+    const quoteRows = document.querySelectorAll('[data-cms-section="header"] .row, [data-cms-section="contact"] .contact-right-stack');
+    quoteRows.forEach((row) => {
+      if (data.quote === false) {
+        row.classList.add('cms-quote-hidden');
+      } else {
+        row.classList.remove('cms-quote-hidden');
+      }
+    });
+  }
+
   /* ── Hero Slider ───────────────────────────────────────── */
   function initSlider() {
     const slider  = document.querySelector('.swiper-slider');
@@ -329,8 +463,8 @@
     }
 
     // Active nav highlight
-    const sections = Array.from(document.querySelectorAll('[id]'));
-    const links    = document.querySelectorAll('.rd-navbar-nav a[href^="#"]');
+    const sections = Array.from(document.querySelectorAll('[id]')).filter((sec) => !sec.hidden && sec.offsetParent !== null);
+    const links    = Array.from(document.querySelectorAll('.rd-navbar-nav a[href^="#"]')).filter((link) => !link.closest('li')?.hidden);
     function updateActive() {
       let active = '';
       sections.forEach(sec => {
@@ -1008,31 +1142,9 @@
   }
 
   function getSocialCMSData() {
-    function sanitizeHref(value) {
-      const href = String(value || '').trim();
-      if (!href) return '#';
-      return SAFE_HREF_RE.test(href) ? href : '#';
-    }
-
-    function sanitizeLink(item, fallback) {
-      item = item || {};
-      fallback = fallback || {};
-      return {
-        key: String(item.key || fallback.key || ''),
-        label: String(item.label || fallback.label || '').trim(),
-        iconClass: String(item.iconClass || fallback.iconClass || '').trim(),
-        href: sanitizeHref(item.href),
-        enabled: Boolean(item.enabled)
-      };
-    }
-
     function normalize(raw) {
       if (!raw || typeof raw !== 'object') return null;
-      if (!Array.isArray(raw.links)) return null;
-      const links = raw.links
-        .slice(0, 12)
-        .map((item, idx) => sanitizeLink(item, DEFAULT_SOCIAL_CMS.links[idx] || {}))
-        .filter(item => item.iconClass);
+      const links = normalizeSocialLinks(raw.links).slice(0, 12);
       if (!links.length) return null;
       return { links };
     }
@@ -1344,6 +1456,7 @@
       : Promise.resolve(null);
 
     syncPromise.finally(function () {
+      initSectionVisibility();
       initLogo();
       initHeaderCMS();
       initPreloader();

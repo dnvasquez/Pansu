@@ -11,11 +11,11 @@ function json(payload, status = 200, headers = {}) {
 }
 
 function sanitizeNext(nextValue) {
-  const next = String(nextValue || '/admin.html');
-  if (!next.startsWith('/')) return '/admin.html';
-  if (next.startsWith('//')) return '/admin.html';
+  const next = String(nextValue || '/admin-header.html');
+  if (!next.startsWith('/')) return '/admin-header.html';
+  if (next.startsWith('//')) return '/admin-header.html';
   if (/^\/admin(?:-[a-z0-9-]+)?\.html$/i.test(next)) return next;
-  return '/admin.html';
+  return '/admin-header.html';
 }
 
 export default async function handler(request) {

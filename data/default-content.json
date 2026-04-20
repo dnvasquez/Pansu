@@ -103,6 +103,13 @@
         "enabled": true
       },
       {
+        "key": "instagram",
+        "label": "Instagram",
+        "iconClass": "fa-brands fa-instagram",
+        "href": "#",
+        "enabled": true
+      },
+      {
         "key": "youtube",
         "label": "YouTube",
         "iconClass": "fa-brands fa-youtube",
@@ -117,6 +124,18 @@
         "enabled": true
       }
     ]
+  },
+  "visibility": {
+    "header": true,
+    "why": true,
+    "kpis": true,
+    "about": true,
+    "savings": true,
+    "products": true,
+    "faq": true,
+    "contact": true,
+    "quote": true,
+    "social": true
   },
   "faq": {
     "items": [

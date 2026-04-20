@@ -41,6 +41,53 @@ function sanitizeHref(value) {
   return SAFE_HREF_RE.test(href) ? href : '#';
 }
 
+function normalizeVisibility(raw, defaults) {
+  const fallback = (defaults && defaults.visibility) || {};
+  const source = raw && typeof raw === 'object' ? raw : {};
+  const keys = Object.keys(fallback);
+  return keys.reduce((acc, key) => {
+    acc[key] = typeof source[key] === 'undefined' ? Boolean(fallback[key]) : Boolean(source[key]);
+    return acc;
+  }, {});
+}
+
+function normalizeSocialLinks(rawLinks, defaultLinks) {
+  const raw = Array.isArray(rawLinks) ? rawLinks : [];
+  const defaults = Array.isArray(defaultLinks) ? defaultLinks : [];
+  const byKey = new Map();
+  raw.forEach((item) => {
+    if (!item || typeof item !== 'object') return;
+    const key = String(item.key || '').trim();
+    if (!key) return;
+    byKey.set(key, item);
+  });
+
+  const merged = defaults.map((fallback) => {
+    const item = byKey.get(fallback.key) || {};
+    return {
+      key: String(item.key || fallback.key || ''),
+      label: String(item.label || fallback.label || '').trim(),
+      iconClass: String(item.iconClass || fallback.iconClass || '').trim(),
+      href: sanitizeHref(item.href || fallback.href),
+      enabled: Boolean(typeof item.enabled === 'undefined' ? fallback.enabled : item.enabled)
+    };
+  });
+
+  raw.forEach((item) => {
+    const key = String(item && item.key || '').trim();
+    if (!key || defaults.some((fallback) => fallback.key === key)) return;
+    merged.push({
+      key,
+      label: String(item.label || key).trim(),
+      iconClass: String(item.iconClass || '').trim(),
+      href: sanitizeHref(item.href),
+      enabled: Boolean(item.enabled)
+    });
+  });
+
+  return merged.filter((item) => item.iconClass);
+}
+
 function sanitizeContent(content) {
   const defaults = getDefaultContent();
   const merged = deepMerge(defaults, content);
@@ -50,18 +97,12 @@ function sanitizeContent(content) {
     merged.quote.destinationEmail = EMAIL_RE.test(email) ? email : defaults.quote.destinationEmail;
   }
 
+  if (merged.visibility && typeof merged.visibility === 'object') {
+    merged.visibility = normalizeVisibility(merged.visibility, defaults);
+  }
+
   if (merged.social && Array.isArray(merged.social.links)) {
-    merged.social.links = merged.social.links.map((item, idx) => {
-      const fallback = (defaults.social && Array.isArray(defaults.social.links) && defaults.social.links[idx]) || {};
-      const href = sanitizeHref(item && item.href);
-      return {
-        key: String((item && item.key) || fallback.key || ''),
-        label: String((item && item.label) || fallback.label || '').trim(),
-        iconClass: String((item && item.iconClass) || fallback.iconClass || '').trim(),
-        href,
-        enabled: Boolean(item && item.enabled)
-      };
-    });
+    merged.social.links = normalizeSocialLinks(merged.social.links, defaults.social && defaults.social.links);
   }
 
   return merged;

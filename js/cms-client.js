@@ -8,6 +8,7 @@
     about: 'pansur_about_cms_v1',
     contact: 'pansur_contact_cms_v1',
     social: 'pansur_social_cms_v1',
+    visibility: 'pansur_visibility_cms_v1',
     faq: 'pansur_faq_cms_v1',
     quote: 'pansur_quote_cms_v1',
     products: 'pansur_products_cms_v2',

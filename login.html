@@ -210,7 +210,7 @@
         var form = document.getElementById('login-form');
         var status = document.getElementById('status');
         var params = new URLSearchParams(window.location.search);
-        var next = params.get('next') || '/admin.html';
+        var next = params.get('next') || '/admin-header.html';
         var isFileProtocol = window.location.protocol === 'file:';
 
         if (window.PansurCMS) {
@@ -250,7 +250,7 @@
               status.style.color = '#b02020';
               return;
             }
-            window.location.href = data.redirect || '/admin.html';
+            window.location.href = data.redirect || '/admin-header.html';
           } catch (err) {
             status.textContent = isFileProtocol
               ? 'No hay servidor activo. Abre el sitio desde http://127.0.0.1:3000/login.html.'

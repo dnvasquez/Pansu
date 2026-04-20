@@ -1,0 +1,125 @@
+(function () {
+  'use strict';
+
+  var SECTION = 'visibility';
+  var KEY = 'pansur_visibility_cms_v1';
+  var DEFAULTS = {
+    header: true,
+    why: true,
+    kpis: true,
+    about: true,
+    savings: true,
+    products: true,
+    faq: true,
+    contact: true,
+    quote: true,
+    social: true
+  };
+
+  var state = null;
+
+  function byId(id) { return document.getElementById(id); }
+  function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+  function normalize(raw) {
+    var result = clone(DEFAULTS);
+    if (!raw || typeof raw !== 'object') return result;
+    Object.keys(DEFAULTS).forEach(function (key) {
+      if (typeof raw[key] !== 'undefined') result[key] = Boolean(raw[key]);
+    });
+    return result;
+  }
+
+  function loadData() {
+    try {
+      var parsed = JSON.parse(localStorage.getItem(KEY) || 'null');
+      return normalize(parsed);
+    } catch (err) {}
+    return clone(DEFAULTS);
+  }
+
+  function saveData() {
+    var payload = clone(state);
+    if (window.PansurCMS) {
+      return window.PansurCMS.saveSection(SECTION, payload).then(function () {
+        localStorage.setItem(KEY, JSON.stringify(payload));
+        return payload;
+      });
+    }
+    localStorage.setItem(KEY, JSON.stringify(payload));
+    return Promise.resolve(payload);
+  }
+
+  function setStatus(message, ok, root) {
+    var el = root.querySelector('[data-visibility-status]');
+    if (!el) return;
+    el.textContent = message;
+    el.classList.toggle('is-on', !!ok);
+    el.classList.toggle('is-off', !ok);
+  }
+
+  function renderTicket(container) {
+    var sectionKey = container.getAttribute('data-section-visibility-ticket');
+    var label = container.getAttribute('data-section-label') || sectionKey;
+    var helpText = container.getAttribute('data-section-help') || 'Activa o desactiva esta seccion sin salir del CMS.';
+    var enabled = state[sectionKey] !== false;
+
+    container.innerHTML = '' +
+      '<div class="admin-hero-badge-card ' + (enabled ? 'is-on' : 'is-off') + '">' +
+        '<p class="admin-hero-badge-kicker">Visibilidad de seccion</p>' +
+        '<h2 class="admin-hero-badge-title">' + escapeHtml(label) + '</h2>' +
+        '<p class="admin-hero-badge-copy">' + escapeHtml(helpText) + '</p>' +
+        '<div class="admin-hero-badge-row">' +
+          '<span class="admin-hero-badge-status ' + (enabled ? 'is-on' : 'is-off') + '" data-visibility-status>' + (enabled ? 'Visible' : 'Oculta') + '</span>' +
+          '<div class="form-check form-switch">' +
+            '<input class="form-check-input" type="checkbox" ' + (enabled ? 'checked' : '') + ' aria-label="' + escapeHtml(label) + '">' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    var card = container.querySelector('.admin-hero-badge-card');
+    var status = container.querySelector('[data-visibility-status]');
+    var input = container.querySelector('.form-check-input');
+
+    input.addEventListener('change', function () {
+      state[sectionKey] = input.checked;
+      card.classList.toggle('is-on', input.checked);
+      card.classList.toggle('is-off', !input.checked);
+      status.textContent = input.checked ? 'Visible' : 'Oculta';
+      status.classList.toggle('is-on', input.checked);
+      status.classList.toggle('is-off', !input.checked);
+      saveData().catch(function () {
+        state[sectionKey] = !input.checked;
+        input.checked = state[sectionKey];
+        card.classList.toggle('is-on', input.checked);
+        card.classList.toggle('is-off', !input.checked);
+        status.textContent = input.checked ? 'Visible' : 'Oculta';
+        setStatus('No se pudo guardar la visibilidad.', false, container);
+      });
+    });
+  }
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  async function init() {
+    var widgets = Array.from(document.querySelectorAll('[data-section-visibility-ticket]'));
+    if (!widgets.length) return;
+
+    if (window.PansurCMS && typeof window.PansurCMS.syncFromServer === 'function') {
+      try {
+        await window.PansurCMS.syncFromServer();
+      } catch (err) {}
+    }
+
+    state = loadData();
+    widgets.forEach(renderTicket);
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+})();

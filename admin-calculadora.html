@@ -43,7 +43,7 @@
           <a href="admin-contacto.html">Ajuste de Contacto</a>
           <a href="admin-rrss.html">Redes sociales</a>
           <a href="admin-faq.html">Preguntas frecuentes</a>
-          <a href="admin-cotizacion.html">Solicitud de cotizaciÃ³n</a>
+          <a href="admin-cotizacion.html">Solicitud de cotización</a>
           <a href="admin.html">Nuestros productos</a>
           <a class="active" href="admin-calculadora.html">Calculadora de ahorro</a>
           <a href="index.html">Volver al sitio</a>
@@ -52,9 +52,12 @@
 
       <main class="admin-content">
         <div class="admin-hero">
-          <p class="admin-eyebrow">Pansu CMS</p>
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1 class="h3 admin-title m-0">Panel de calculadora de ahorro</h1>
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+            <div class="admin-hero-copy">
+              <p class="admin-eyebrow">Pansu CMS</p>
+              <h1 class="h3 admin-title m-0">Panel de calculadora de ahorro</h1>
+            </div>
+            <div class="admin-hero-badge" data-section-visibility-ticket="savings" data-section-label="Calculadora de ahorro" data-section-help="Muestra u oculta la calculadora del landing."></div>
           </div>
         </div>
         <p class="small-note mb-3">Configura los campos de calculo usados en la calculadora de ahorro del landing.</p>
@@ -107,6 +110,7 @@
 
     <script src="js/cms-client.js"></script>
     <script src="js/admin-auth.js"></script>
+    <script src="js/admin-visibility.js"></script>
     <script src="js/admin-charcount.js"></script>
     <script src="js/admin-calculadora.js"></script>
   </body>
