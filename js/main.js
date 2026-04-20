@@ -938,7 +938,7 @@
 
     const mapFrame = document.querySelector('[data-contact-map-frame]');
     if (mapFrame) {
-      const query = [address1, address2, name].filter(Boolean).join(', ');
+      const query = name || [address1, address2].filter(Boolean).join(', ');
       const mapQuery = encodeURIComponent(query || 'Chile');
       mapFrame.setAttribute('src', 'https://www.google.com/maps?q=' + mapQuery + '&output=embed');
     }
