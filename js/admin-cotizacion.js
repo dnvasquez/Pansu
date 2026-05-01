@@ -70,9 +70,11 @@
       var id = 'quote-region-' + idx;
       var checked = active.has(region) ? ' checked' : '';
       return '' +
-        '<div class="form-check">' +
+        '<div class="col-12 col-sm-6 col-lg-4">' +
+          '<div class="form-check mb-0">' +
           '<input class="form-check-input quote-region-check" type="checkbox" id="' + id + '" value="' + region.replace(/"/g, '&quot;') + '"' + checked + '>' +
           '<label class="form-check-label" for="' + id + '">' + region + '</label>' +
+          '</div>' +
         '</div>';
     }).join('');
   }

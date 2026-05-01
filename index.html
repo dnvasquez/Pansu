@@ -320,7 +320,7 @@
                 <div class="contact-cta-card text-start" data-cms-section="quote">
                   <h5 data-contact-form-title>Solicita una cotizacion para una instalacion de paneles solares residencial o comercial</h5>
                   <p class="font-size-12 offset-top-10">Para solicitar una cotización, envíanos un mensaje.</p>
-                  <a class="btn btn-primary offset-top-20" data-quote-cta href="#home">FORMULARIO DE COTIZACION</a>
+                  <a class="btn btn-primary offset-top-20" data-quote-cta data-quote-modal-trigger href="#quoteMobileModal">FORMULARIO DE COTIZACION</a>
                 </div>
               </div>
             </div>
@@ -329,30 +329,37 @@
       </section>
 
       <div class="modal fade" id="quoteMobileModal" tabindex="-1" aria-labelledby="quoteMobileModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="quoteMobileModalLabel">Solicitar cotizacion</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-              <form class="rd-mailform text-center" data-quote-form data-form-output="form-output-global" data-form-type="contact" method="post" action="#">
+        <div class="modal-dialog modal-dialog-centered quote-modal-dialog">
+          <div class="modal-content quote-modal-content">
+            <button type="button" class="btn-close quote-modal-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <div class="bg-default section-form-slider quote-modal-card">
+              <h5 id="quoteMobileModalLabel">Solicita una cotizacion para una instalacion de paneles solares residencial o comercial</h5>
+              <form class="rd-mailform text-center offset-top-30 quote-modal-form" data-quote-form data-form-output="form-output-global" data-form-type="contact" method="post" action="#">
                 <input type="hidden" name="destination_email" data-quote-destination value="">
-                <div class="form-wrap"><label class="form-label" for="contact-name-mobile">Nombre y Apellidos</label><input class="form-input" id="contact-name-mobile" type="text" name="full_name" placeholder="Ejemplo: Maria Gonzalez Rojas" data-constraints="@Required"></div>
                 <div class="form-wrap">
-                  <select class="form-input select-filter" id="contact-region-mobile" name="region" data-quote-region data-placeholder="Region de Chile" data-minimum-results-for-search="Infinity" data-constraints="@Required">
+                  <label class="form-label" for="contact-name-mobile">Nombre y Apellidos</label>
+                  <input class="form-input" id="contact-name-mobile" type="text" name="full_name" placeholder="Nombre y Apellidos" data-constraints="@Required">
+                </div>
+                <div class="form-wrap">
+                  <select class="form-input select-filter" id="contact-region-mobile" name="region" data-quote-region data-placeholder="Región" data-minimum-results-search="Infinity" data-constraints="@Required">
                     <option value="">Region de Chile</option>
                   </select>
                 </div>
                 <div class="form-wrap">
-                  <select class="form-input select-filter" id="contact-comuna-mobile" name="comuna" data-quote-comuna data-placeholder="Comuna" data-minimum-results-for-search="Infinity" data-constraints="@Required">
+                  <select class="form-input select-filter" id="contact-comuna-mobile" name="comuna" data-quote-comuna data-placeholder="Comuna" data-minimum-results-search="Infinity" data-constraints="@Required">
                     <option value="">Comuna</option>
                   </select>
                 </div>
-                <div class="form-wrap"><label class="form-label" for="contact-email-mobile">Correo de contacto</label><input class="form-input" id="contact-email-mobile" type="email" name="contact_email" placeholder="Ejemplo: contacto@empresa.cl" data-constraints="@Email @Required"></div>
-                <div class="form-wrap"><label class="form-label" for="contact-phone-mobile">Numero de telefono</label><input class="form-input" id="contact-phone-mobile" type="text" name="contact_phone" placeholder="Ejemplo: +56 2 2345 6789" data-constraints="@Numeric @Required"></div>
                 <div class="form-wrap">
-                  <select class="form-input select-filter" name="quote_type" data-placeholder="Tipo de solicitud" data-minimum-results-for-search="Infinity" data-constraints="@Required">
+                  <label class="form-label" for="contact-email-mobile">Correo de contacto</label>
+                  <input class="form-input" id="contact-email-mobile" type="email" name="contact_email" placeholder="nombre@correo.cl" data-constraints="@Email @Required">
+                </div>
+                <div class="form-wrap">
+                  <label class="form-label" for="contact-phone-mobile">Numero de telefono</label>
+                  <input class="form-input" id="contact-phone-mobile" type="text" name="contact_phone" placeholder="+56 9 XXXX XXXX" data-constraints="@Numeric @Required">
+                </div>
+                <div class="form-wrap">
+                  <select class="form-input select-filter" name="quote_type" data-placeholder="Tipo de solicitud" data-minimum-results-search="Infinity" data-constraints="@Required">
                     <option value="">Tipo de solicitud</option>
                     <option value="Residencia">Residencia</option>
                     <option value="Comercial">Comercial</option>

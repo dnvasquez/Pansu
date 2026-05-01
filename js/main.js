@@ -1044,6 +1044,7 @@
   }
 
   function initQuoteFormsCMS() {
+    ensureQuoteModal();
     const forms = Array.from(document.querySelectorAll('[data-quote-form]'));
     if (!forms.length) return;
     let quoteData = getQuoteCMSData();
@@ -1175,18 +1176,73 @@
     }).catch(function () {});
   }
 
-  function initMobileQuoteCTA() {
-    const cta = document.querySelector('[data-quote-cta]');
-    const modalEl = document.querySelector('#quoteMobileModal');
-    if (!cta || !modalEl) return;
+  function ensureQuoteModal() {
+    let modalEl = document.querySelector('#quoteMobileModal');
+    if (modalEl) return modalEl;
 
-    cta.addEventListener('click', function (e) {
-      if (window.innerWidth > 991) return;
-      e.preventDefault();
-      if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {
-        const instance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
-        instance.show();
-      }
+    const shell = document.createElement('div');
+    shell.innerHTML = '' +
+      '<div class="modal fade" id="quoteMobileModal" tabindex="-1" aria-labelledby="quoteMobileModalLabel" aria-hidden="true">' +
+        '<div class="modal-dialog modal-dialog-centered quote-modal-dialog">' +
+          '<div class="modal-content quote-modal-content">' +
+            '<button type="button" class="btn-close quote-modal-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>' +
+            '<div class="bg-default section-form-slider quote-modal-card">' +
+              '<h5 id="quoteMobileModalLabel">Solicita una cotizacion para una instalacion de paneles solares residencial o comercial</h5>' +
+              '<form class="rd-mailform text-center offset-top-30 quote-modal-form" data-quote-form data-form-output="form-output-global" data-form-type="contact" method="post" action="#">' +
+                '<input type="hidden" name="destination_email" data-quote-destination value="">' +
+                '<div class="form-wrap">' +
+                  '<label class="form-label" for="contact-name-mobile">Nombre y Apellidos</label>' +
+                  '<input class="form-input" id="contact-name-mobile" type="text" name="full_name" placeholder="Nombre y Apellidos" data-constraints="@Required">' +
+                '</div>' +
+                '<div class="form-wrap">' +
+                  '<select class="form-input select-filter" id="contact-region-mobile" name="region" data-quote-region data-placeholder="Región" data-minimum-results-search="Infinity" data-constraints="@Required">' +
+                    '<option value="">Region de Chile</option>' +
+                  '</select>' +
+                '</div>' +
+                '<div class="form-wrap">' +
+                  '<select class="form-input select-filter" id="contact-comuna-mobile" name="comuna" data-quote-comuna data-placeholder="Comuna" data-minimum-results-search="Infinity" data-constraints="@Required">' +
+                    '<option value="">Comuna</option>' +
+                  '</select>' +
+                '</div>' +
+                '<div class="form-wrap">' +
+                  '<label class="form-label" for="contact-email-mobile">Correo de contacto</label>' +
+                  '<input class="form-input" id="contact-email-mobile" type="email" name="contact_email" placeholder="nombre@correo.cl" data-constraints="@Email @Required">' +
+                '</div>' +
+                '<div class="form-wrap">' +
+                  '<label class="form-label" for="contact-phone-mobile">Numero de telefono</label>' +
+                  '<input class="form-input" id="contact-phone-mobile" type="text" name="contact_phone" placeholder="+56 9 XXXX XXXX" data-constraints="@Numeric @Required">' +
+                '</div>' +
+                '<div class="form-wrap">' +
+                  '<select class="form-input select-filter" name="quote_type" data-placeholder="Tipo de solicitud" data-minimum-results-search="Infinity" data-constraints="@Required">' +
+                    '<option value="">Tipo de solicitud</option>' +
+                    '<option value="Residencia">Residencia</option>' +
+                    '<option value="Comercial">Comercial</option>' +
+                  '</select>' +
+                '</div>' +
+                '<button class="btn btn-primary offset-top-30" type="submit">SOLICITAR COTIZACION</button>' +
+              '</form>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(shell.firstElementChild);
+    modalEl = document.querySelector('#quoteMobileModal');
+    return modalEl;
+  }
+
+  function initQuoteModalTriggers() {
+    const modalEl = ensureQuoteModal();
+    const triggers = Array.from(document.querySelectorAll('[data-quote-cta], [data-quote-modal-trigger]'));
+    if (!triggers.length || !modalEl) return;
+
+    triggers.forEach((trigger) => {
+      trigger.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+          const instance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+          instance.show();
+        }
+      });
     });
   }
 
@@ -1505,6 +1561,7 @@
       : Promise.resolve(null);
 
     syncPromise.finally(function () {
+      ensureQuoteModal();
       initSectionVisibility();
       initLogo();
       initHeaderCMS();
@@ -1522,7 +1579,7 @@
       initContactCMS();
       initAboutCMS();
       initQuoteFormsCMS();
-      initMobileQuoteCTA();
+      initQuoteModalTriggers();
       initFaqCMS();
       initWhyCMS();
       initKpisCMS();
