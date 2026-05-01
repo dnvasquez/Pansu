@@ -44,7 +44,7 @@
           <a href="admin-rrss.html">Redes sociales</a>
           <a href="admin-faq.html">Preguntas frecuentes</a>
           <a class="active" href="admin-cotizacion.html">Solicitud de cotización</a>
-          <a href="admin.html">Nuestros productos</a>
+          <a href="admin.html">Nuestros Servicios</a>
           <a href="admin-calculadora.html">Calculadora de ahorro</a>
           <a href="index.html">Volver al sitio</a>
         </nav>
@@ -60,7 +60,7 @@
             <div class="admin-hero-badge" data-section-visibility-ticket="quote" data-section-label="Solicitud de cotización" data-section-help="Oculta o muestra el bloque de formularios y llamados a cotizar."></div>
           </div>
         </div>
-        <p class="small-note mb-3">Define el correo de destino al que se enviaran las solicitudes ingresadas en los formularios de cotización.</p>
+        <p class="small-note mb-3">Define el correo de destino y las regiones disponibles para los formularios de cotización.</p>
 
         <form id="quote-cms-form">
           <div class="admin-card">
@@ -70,6 +70,18 @@
                 <input class="form-control" id="quote-destination-email" type="email" maxlength="120" required>
               </div>
             </div>
+          </div>
+
+          <div class="admin-card mt-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+              <h2 class="h5 m-0">Regiones habilitadas</h2>
+              <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-outline-success btn-sm" id="select-all-regions" type="button">Habilitar todas</button>
+                <button class="btn btn-outline-secondary btn-sm" id="clear-all-regions" type="button">Deshabilitar todas</button>
+              </div>
+            </div>
+            <div class="small-note mb-2">Solo las regiones marcadas apareceran en el formulario de cotizacion del sitio.</div>
+            <div class="row g-2" id="quote-regions-list"></div>
           </div>
 
           <div class="d-flex flex-wrap gap-2 mt-4">

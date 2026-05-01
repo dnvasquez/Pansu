@@ -26,7 +26,7 @@
 
   function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
   function defaultDescription(title) {
-    var safeTitle = String(title || '').trim() || 'este producto';
+    var safeTitle = String(title || '').trim() || 'este servicio';
     return 'Descripcion general de ' + safeTitle + '. Puedes editar este texto desde el panel CMS.';
   }
 
@@ -117,16 +117,16 @@
             '<input class="form-control product-title" type="text" maxlength="' + TITLE_MAX + '" value="' + escapeHtml(product.title) + '" required>' +
             '<label class="form-label mt-2">URL de imagen</label>' +
             '<input class="form-control product-image" type="url" maxlength="' + IMAGE_URL_MAX + '" value="' + escapeHtml(product.image) + '">' +
-            '<label class="form-label mt-2">Descripcion del producto</label>' +
+            '<label class="form-label mt-2">Descripcion del servicio</label>' +
             '<textarea class="form-control product-description" rows="4" maxlength="' + DESCRIPTION_MAX + '" required>' + escapeHtml(product.description || '') + '</textarea>' +
             '<label class="form-label mt-2">O subir imagen (maximo 900 KB)</label>' +
             '<input class="form-control product-file" type="file" accept="image/*">' +
             '<div class="mt-3">' +
-              '<button class="btn btn-outline-danger btn-sm remove-product" type="button">Eliminar producto</button>' +
+              '<button class="btn btn-outline-danger btn-sm remove-product" type="button">Eliminar servicio</button>' +
             '</div>' +
           '</div>' +
           '<div class="col-md-5">' +
-            '<img class="preview product-preview" src="' + escapeHtml(product.image) + '" alt="Vista previa producto">' +
+            '<img class="preview product-preview" src="' + escapeHtml(product.image) + '" alt="Vista previa servicio">' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -196,7 +196,7 @@
           return;
         }
         if (file.size > PRODUCT_IMAGE_MAX_BYTES) {
-          setStatus('La imagen del producto supera el limite de ' + prettySize(PRODUCT_IMAGE_MAX_BYTES) + '.', false);
+          setStatus('La imagen del servicio supera el limite de ' + prettySize(PRODUCT_IMAGE_MAX_BYTES) + '.', false);
           fileInput.value = '';
           return;
         }
@@ -212,7 +212,7 @@
 
       removeBtn.addEventListener('click', function () {
         if (state.products.length <= 3) {
-          setStatus('Debes mantener al menos 3 productos en el catalogo.', false);
+          setStatus('Debes mantener al menos 3 servicios en el catalogo.', false);
           return;
         }
         var removed = state.products.splice(idx, 1)[0];
@@ -242,7 +242,7 @@
 
   function validateBeforeSave() {
     if (!Array.isArray(state.products) || state.products.length < 3) {
-      setStatus('Debes tener al menos 3 productos.', false);
+      setStatus('Debes tener al menos 3 servicios.', false);
       return false;
     }
 
@@ -256,7 +256,7 @@
       p.image = p.image.slice(0, IMAGE_URL_MAX);
       p.description = p.description.slice(0, DESCRIPTION_MAX);
       if (!p.title || !p.image || !p.description) {
-        setStatus('Todos los productos deben tener titulo, imagen y descripcion.', false);
+        setStatus('Todos los servicios deben tener titulo, imagen y descripcion.', false);
         return false;
       }
       if (!p.id || ids.has(p.id)) p.id = 'p' + Date.now() + '_' + i;
@@ -266,7 +266,7 @@
     state.featuredIds = [byId('featured-0').value, byId('featured-1').value, byId('featured-2').value];
     var uniqueFeatured = new Set(state.featuredIds);
     if (uniqueFeatured.size !== 3) {
-      setStatus('Debes seleccionar 3 productos destacados distintos.', false);
+      setStatus('Debes seleccionar 3 servicios destacados distintos.', false);
       return false;
     }
     if (!state.featuredIds.every(function (id) { return ids.has(id); })) {
@@ -296,9 +296,9 @@
       var id = 'p' + Date.now();
       state.products.push({
         id: id,
-        title: 'Nuevo producto'.slice(0, TITLE_MAX),
+        title: 'Nuevo servicio'.slice(0, TITLE_MAX),
         image: 'images/product-01-370x300.jpg'.slice(0, IMAGE_URL_MAX),
-        description: 'Descripcion general de este producto. Edita este texto con las caracteristicas principales.'.slice(0, DESCRIPTION_MAX)
+        description: 'Descripcion general de este servicio. Edita este texto con las caracteristicas principales.'.slice(0, DESCRIPTION_MAX)
       });
       render();
     });
@@ -310,7 +310,7 @@
         await saveData();
         setStatus('Cambios guardados correctamente.', true);
       } catch (err) {
-        setStatus('No se pudieron guardar los productos.', false);
+        setStatus('No se pudieron guardar los servicios.', false);
       }
     });
 
@@ -327,7 +327,7 @@
         render();
         setStatus('Se restauraron los valores por defecto.', true);
       } catch (err) {
-        setStatus('No se pudieron restaurar los productos.', false);
+        setStatus('No se pudieron restaurar los servicios.', false);
       }
     });
   }

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="images/logo_movil.png" type="image/png">
-    <title>Administracion Productos | PANSU</title>
+    <title>Administracion Servicios | PANSU</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <style>
       body { background:#f4f7f3; color:#1c1c1c; }
@@ -67,7 +67,7 @@
           <a href="admin-rrss.html">Redes sociales</a>
           <a href="admin-faq.html">Preguntas frecuentes</a>
           <a href="admin-cotizacion.html">Solicitud de cotización</a>
-          <a class="active" href="admin.html">Nuestros productos</a>
+          <a class="active" href="admin.html">Nuestros Servicios</a>
           <a href="admin-calculadora.html">Calculadora de ahorro</a>
           <a href="index.html">Volver al sitio</a>
         </nav>
@@ -78,21 +78,21 @@
           <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
             <div class="admin-hero-copy">
               <p class="admin-eyebrow">Pansu CMS</p>
-              <h1 class="h3 admin-title m-0">Panel de administracion de productos</h1>
+              <h1 class="h3 admin-title m-0">Panel de administracion de servicios</h1>
             </div>
-            <div class="admin-hero-badge" data-section-visibility-ticket="products" data-section-label="Productos" data-section-help="Controla si la vitrina de productos aparece en el sitio."></div>
+            <div class="admin-hero-badge" data-section-visibility-ticket="products" data-section-label="Servicios" data-section-help="Controla si la vitrina de servicios aparece en el sitio."></div>
           </div>
         </div>
 
         <p class="small-note mb-3">
-          Administra todo el catalogo de "Nuestros productos" y selecciona los 3 productos destacados para el landing.
+          Administra todo el catalogo de "Nuestros Servicios" y selecciona los 3 servicios destacados para el landing.
         </p>
 
         <form id="products-cms-form">
           <div class="admin-card mb-3">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
               <h2 class="h5 m-0">Destacados del landing</h2>
-              <span class="small-note">Debes elegir 3 productos distintos</span>
+              <span class="small-note">Debes elegir 3 servicios distintos</span>
             </div>
             <div class="d-flex flex-wrap gap-2 mt-3">
               <select class="form-select featured-pick" id="featured-0"></select>
@@ -104,7 +104,7 @@
           <div class="admin-card">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
               <h2 class="h5 m-0">Catalogo completo</h2>
-              <button class="btn btn-outline-success btn-sm" type="button" id="add-product-btn">Agregar producto</button>
+              <button class="btn btn-outline-success btn-sm" type="button" id="add-product-btn">Agregar servicio</button>
             </div>
             <div id="products-list"></div>
           </div>
@@ -112,7 +112,7 @@
           <div class="d-flex flex-wrap gap-2 mt-4">
             <button class="btn btn-success" type="submit">Guardar cambios</button>
             <button class="btn btn-outline-danger" id="reset-btn" type="button">Restaurar por defecto</button>
-            <a class="btn btn-primary" href="productos.html">Ver pagina de productos</a>
+            <a class="btn btn-primary" href="productos.html">Ver pagina de servicios</a>
           </div>
           <p class="status mt-3 mb-0" id="status"></p>
         </form>

@@ -61,7 +61,24 @@
     ]
   };
   const DEFAULT_QUOTE_CMS = {
-    destinationEmail: 'ventas@pansur.cl'
+    destinationEmail: 'ventas@pansur.cl',
+    enabledRegions: [
+      'Arica y Parinacota',
+      'Tarapaca',
+      'Antofagasta',
+      'Atacama',
+      'Coquimbo',
+      'Valparaiso',
+      "Libertador General Bernardo O'Higgins",
+      'Maule',
+      'Biobio',
+      'Araucania',
+      'Los Rios',
+      'Los Lagos',
+      'Aysen',
+      'Magallanes y Antartica Chilena',
+      'Metropolitana de Santiago'
+    ]
   };
   const DEFAULT_HEADER_CMS = {
     heroPrimary: 'PAN',
@@ -218,6 +235,18 @@
       acc[key] = typeof raw[key] === 'undefined' ? DEFAULT_VISIBILITY_CMS[key] : Boolean(raw[key]);
       return acc;
     }, {});
+  }
+
+  function normalizeQuoteRegions(rawRegions, fallbackRegions) {
+    const allowed = new Set(Object.keys(CHILE_REGIONS_COMUNAS));
+    if (!Array.isArray(rawRegions)) {
+      return Array.isArray(fallbackRegions) ? fallbackRegions.slice() : [];
+    }
+    const selected = rawRegions
+      .map(region => String(region || '').trim())
+      .filter(region => region && allowed.has(region));
+    const unique = Array.from(new Set(selected));
+    return Object.keys(CHILE_REGIONS_COMUNAS).filter(region => unique.includes(region));
   }
 
   /* ── Preloader ─────────────────────────────────────────── */
@@ -989,7 +1018,10 @@
     }
     if (!parsed || typeof parsed !== 'object') return DEFAULT_QUOTE_CMS;
     const email = String(parsed.destinationEmail || '').trim();
-    return { destinationEmail: EMAIL_RE.test(email) ? email : DEFAULT_QUOTE_CMS.destinationEmail };
+    return {
+      destinationEmail: EMAIL_RE.test(email) ? email : DEFAULT_QUOTE_CMS.destinationEmail,
+      enabledRegions: normalizeQuoteRegions(parsed.enabledRegions, DEFAULT_QUOTE_CMS.enabledRegions)
+    };
   }
 
   async function fetchQuoteCMSData() {
@@ -999,7 +1031,13 @@
       const data = await response.json();
       const email = String(data && data.content && data.content.quote && data.content.quote.destinationEmail || '').trim();
       if (!EMAIL_RE.test(email)) return null;
-      return { destinationEmail: email };
+      return {
+        destinationEmail: email,
+        enabledRegions: normalizeQuoteRegions(
+          data && data.content && data.content.quote && data.content.quote.enabledRegions,
+          DEFAULT_QUOTE_CMS.enabledRegions
+        )
+      };
     } catch (err) {
       return null;
     }
@@ -1009,7 +1047,6 @@
     const forms = Array.from(document.querySelectorAll('[data-quote-form]'));
     if (!forms.length) return;
     let quoteData = getQuoteCMSData();
-    const regions = Object.keys(CHILE_REGIONS_COMUNAS);
 
     function applyDestination(email) {
       forms.forEach((form) => {
@@ -1019,6 +1056,7 @@
     }
 
     function fillRegions(regionSelect) {
+      const regions = Array.isArray(quoteData.enabledRegions) ? quoteData.enabledRegions : Object.keys(CHILE_REGIONS_COMUNAS);
       regionSelect.innerHTML = '<option value="">Region de Chile</option>' +
         regions.map(region => '<option value="' + region + '">' + region + '</option>').join('');
     }
@@ -1122,6 +1160,17 @@
     fetchQuoteCMSData().then((serverQuote) => {
       if (!serverQuote || !serverQuote.destinationEmail) return;
       quoteData = serverQuote;
+      forms.forEach((form) => {
+        const regionSelect = form.querySelector('[data-quote-region]');
+        const comunaSelect = form.querySelector('[data-quote-comuna]');
+        if (regionSelect && comunaSelect) {
+          fillRegions(regionSelect);
+          if (!quoteData.enabledRegions.includes(regionSelect.value)) {
+            regionSelect.value = '';
+            fillComunas(comunaSelect, '');
+          }
+        }
+      });
       applyDestination(quoteData.destinationEmail);
     }).catch(function () {});
   }

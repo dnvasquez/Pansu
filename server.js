@@ -153,6 +153,15 @@ function normalizeSocialLinks(rawLinks, defaultLinks) {
   return merged.filter((item) => item.iconClass);
 }
 
+function normalizeQuoteRegions(rawRegions, defaultRegions) {
+  const defaults = Array.isArray(defaultRegions) ? defaultRegions.filter(Boolean) : [];
+  const allowed = new Set(defaults);
+  if (!Array.isArray(rawRegions)) return defaults;
+  const selected = rawRegions.map((region) => String(region || '').trim()).filter((region) => region && allowed.has(region));
+  const unique = Array.from(new Set(selected));
+  return defaults.filter((region) => unique.includes(region));
+}
+
 function getDefaultContent() {
   return JSON.parse(fs.readFileSync(DEFAULTS_PATH, 'utf8'));
 }
@@ -173,6 +182,7 @@ function sanitizeContent(content) {
   if (merged.quote && typeof merged.quote === 'object') {
     const email = String(merged.quote.destinationEmail || '').trim();
     merged.quote.destinationEmail = EMAIL_RE.test(email) ? email : defaults.quote.destinationEmail;
+    merged.quote.enabledRegions = normalizeQuoteRegions(merged.quote.enabledRegions, defaults.quote.enabledRegions);
   }
 
   if (merged.visibility && typeof merged.visibility === 'object') {
