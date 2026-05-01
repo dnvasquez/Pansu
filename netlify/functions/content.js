@@ -14,6 +14,15 @@ function json(statusCode, payload) {
 
 exports.handler = async function (event) {
   if (event.httpMethod === 'GET') {
+    let session = null;
+    try {
+      session = getSession(event);
+    } catch (err) {
+      return json(500, { ok: false, message: 'CMS no configurado' });
+    }
+    if (!session) {
+      return json(401, { ok: false, message: 'Sesion no valida' });
+    }
     const content = await readContent();
     return json(200, { ok: true, content });
   }

@@ -17,6 +17,7 @@
   };
 
   var state = null;
+  var storage = window.PansurStorage || window.sessionStorage || window.localStorage;
 
   function byId(id) { return document.getElementById(id); }
   function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
@@ -32,7 +33,7 @@
 
   function loadData() {
     try {
-      var parsed = JSON.parse(localStorage.getItem(KEY) || 'null');
+      var parsed = JSON.parse(storage.getItem(KEY) || 'null');
       return normalize(parsed);
     } catch (err) {}
     return clone(DEFAULTS);
@@ -42,11 +43,11 @@
     var payload = clone(state);
     if (window.PansurCMS) {
       return window.PansurCMS.saveSection(SECTION, payload).then(function () {
-        localStorage.setItem(KEY, JSON.stringify(payload));
+        storage.setItem(KEY, JSON.stringify(payload));
         return payload;
       });
     }
-    localStorage.setItem(KEY, JSON.stringify(payload));
+    storage.setItem(KEY, JSON.stringify(payload));
     return Promise.resolve(payload);
   }
 

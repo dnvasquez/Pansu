@@ -14,6 +14,7 @@
     products: 'pansur_products_cms_v2',
     savings: 'pansur_savings_cms_v1'
   };
+  var storage = window.PansurStorage || window.sessionStorage || window.localStorage;
 
   function redirectToLogin() {
     var next = encodeURIComponent(window.location.pathname || '/admin-header.html');
@@ -48,7 +49,7 @@
   function syncLocalStorage(content) {
     Object.keys(sectionToKey).forEach(function (section) {
       if (!content || typeof content[section] === 'undefined') return;
-      localStorage.setItem(sectionToKey[section], JSON.stringify(content[section]));
+      storage.setItem(sectionToKey[section], JSON.stringify(content[section]));
     });
   }
 
@@ -64,7 +65,7 @@
       body: JSON.stringify({ section: section, data: payload })
     });
     if (data && data.data && sectionToKey[section]) {
-      localStorage.setItem(sectionToKey[section], JSON.stringify(data.data));
+      storage.setItem(sectionToKey[section], JSON.stringify(data.data));
     }
     return data;
   }
@@ -75,7 +76,7 @@
       body: JSON.stringify({ section: section, reset: true })
     });
     if (data && data.data && sectionToKey[section]) {
-      localStorage.setItem(sectionToKey[section], JSON.stringify(data.data));
+      storage.setItem(sectionToKey[section], JSON.stringify(data.data));
     }
     return data;
   }

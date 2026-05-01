@@ -16,6 +16,7 @@
   };
 
   var state = null;
+  var storage = window.PansurStorage || window.sessionStorage || window.localStorage;
 
   function byId(id) { return document.getElementById(id); }
   function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
@@ -63,7 +64,7 @@
 
   function loadData() {
     try {
-      var parsed = JSON.parse(localStorage.getItem(KEY) || 'null');
+      var parsed = JSON.parse(storage.getItem(KEY) || 'null');
       var valid = normalize(parsed);
       if (valid) return valid;
     } catch (err) {}
@@ -143,7 +144,7 @@
         if (window.PansurCMS) {
           await window.PansurCMS.saveSection(SECTION, payload);
         } else {
-          localStorage.setItem(KEY, JSON.stringify(payload));
+          storage.setItem(KEY, JSON.stringify(payload));
         }
         setStatus('Configuracion de redes sociales guardada correctamente.', true);
       } catch (err) {
@@ -158,7 +159,7 @@
           await window.PansurCMS.syncFromServer();
           state = loadData();
         } else {
-          localStorage.removeItem(KEY);
+          storage.removeItem(KEY);
           state = clone(DEFAULTS);
         }
         render();

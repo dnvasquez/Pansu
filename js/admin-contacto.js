@@ -31,6 +31,7 @@
       }
     ]
   };
+  var storage = window.PansurStorage || window.sessionStorage || window.localStorage;
 
   var state = null;
 
@@ -66,7 +67,7 @@
 
   function loadData() {
     try {
-      var parsed = JSON.parse(localStorage.getItem(KEY) || 'null');
+      var parsed = JSON.parse(storage.getItem(KEY) || 'null');
       var normalized = normalize(parsed);
       if (normalized) return normalized;
     } catch (err) {}
@@ -172,7 +173,7 @@
         if (window.PansurCMS) {
           await window.PansurCMS.saveSection(SECTION, payload);
         } else {
-          localStorage.setItem(KEY, JSON.stringify(payload));
+          storage.setItem(KEY, JSON.stringify(payload));
         }
         setStatus('Informacion de contacto guardada correctamente.', true);
       } catch (err) {
@@ -187,7 +188,7 @@
           await window.PansurCMS.syncFromServer();
           state = loadData();
         } else {
-          localStorage.removeItem(KEY);
+          storage.removeItem(KEY);
           state = clone(DEFAULTS);
         }
         fill(state);

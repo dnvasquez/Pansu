@@ -26,12 +26,13 @@
     destinationEmail: 'ventas@pansur.cl',
     enabledRegions: REGIONS.slice()
   };
+  var storage = window.PansurStorage || window.sessionStorage || window.localStorage;
 
   function byId(id) { return document.getElementById(id); }
 
   function loadData() {
     try {
-      var parsed = JSON.parse(localStorage.getItem(KEY) || 'null');
+      var parsed = JSON.parse(storage.getItem(KEY) || 'null');
       if (parsed && typeof parsed.destinationEmail === 'string' && parsed.destinationEmail.trim()) {
         return {
           destinationEmail: parsed.destinationEmail,
@@ -130,7 +131,7 @@
             enabledRegions: normalizeRegions(enabledRegions)
           });
         } else {
-          localStorage.setItem(KEY, JSON.stringify({
+          storage.setItem(KEY, JSON.stringify({
             destinationEmail: email,
             enabledRegions: normalizeRegions(enabledRegions)
           }));
@@ -147,7 +148,7 @@
           await window.PansurCMS.resetSection(SECTION);
           await window.PansurCMS.syncFromServer();
         } else {
-          localStorage.removeItem(KEY);
+          storage.removeItem(KEY);
         }
         var resetData = loadData();
         emailInput.value = resetData.destinationEmail || DEFAULTS.destinationEmail;

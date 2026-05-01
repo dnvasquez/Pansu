@@ -16,8 +16,8 @@
   const FAQ_CMS_KEY = 'pansur_faq_cms_v1';
   const WHY_CMS_KEY = 'pansur_why_cms_v1';
   const KPIS_CMS_KEY = 'pansur_kpis_cms_v1';
+  const CMS_STORAGE = window.sessionStorage || window.localStorage;
   const SAFE_HREF_RE = /^(?:https?:|mailto:|tel:|#|\/(?!\/))/i;
-  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const DEFAULT_PRODUCTS_CMS = {
     products: [
       { id: 'p1', title: 'NeON 2 315W', image: 'images/product-01-370x300.jpg', description: 'Panel solar monocristalino de alta eficiencia para instalaciones residenciales, con excelente rendimiento en distintas condiciones climaticas.' },
@@ -61,7 +61,6 @@
     ]
   };
   const DEFAULT_QUOTE_CMS = {
-    destinationEmail: 'ventas@pansur.cl',
     enabledRegions: [
       'Arica y Parinacota',
       'Tarapaca',
@@ -312,7 +311,7 @@
 
     let parsed = null;
     try {
-      parsed = JSON.parse(localStorage.getItem(HEADER_CMS_KEY) || 'null');
+      parsed = JSON.parse(CMS_STORAGE.getItem(HEADER_CMS_KEY) || 'null');
     } catch (err) {
       parsed = null;
     }
@@ -352,7 +351,7 @@
 
     let parsed = null;
     try {
-      parsed = JSON.parse(localStorage.getItem(VISIBILITY_CMS_KEY) || 'null');
+      parsed = JSON.parse(CMS_STORAGE.getItem(VISIBILITY_CMS_KEY) || 'null');
     } catch (err) {
       parsed = null;
     }
@@ -711,7 +710,7 @@
 
     let parsed = null;
     try {
-      parsed = JSON.parse(localStorage.getItem(SAVINGS_CMS_KEY) || 'null');
+      parsed = JSON.parse(CMS_STORAGE.getItem(SAVINGS_CMS_KEY) || 'null');
     } catch (err) {
       parsed = null;
     }
@@ -809,7 +808,7 @@
     function migrateLegacy() {
       let legacy = null;
       try {
-        legacy = JSON.parse(localStorage.getItem(LEGACY_PRODUCTS_CMS_KEY) || 'null');
+        legacy = JSON.parse(CMS_STORAGE.getItem(LEGACY_PRODUCTS_CMS_KEY) || 'null');
       } catch (err) {
         legacy = null;
       }
@@ -821,7 +820,7 @@
 
     let parsed = null;
     try {
-      parsed = JSON.parse(localStorage.getItem(PRODUCTS_CMS_KEY) || 'null');
+      parsed = JSON.parse(CMS_STORAGE.getItem(PRODUCTS_CMS_KEY) || 'null');
     } catch (err) {
       parsed = null;
     }
@@ -917,7 +916,7 @@
 
     let parsed = null;
     try {
-      parsed = JSON.parse(localStorage.getItem(CONTACT_CMS_KEY) || 'null');
+      parsed = JSON.parse(CMS_STORAGE.getItem(CONTACT_CMS_KEY) || 'null');
     } catch (err) {
       parsed = null;
     }
@@ -988,7 +987,7 @@
     }
     let parsed = null;
     try {
-      parsed = JSON.parse(localStorage.getItem(ABOUT_CMS_KEY) || 'null');
+      parsed = JSON.parse(CMS_STORAGE.getItem(ABOUT_CMS_KEY) || 'null');
     } catch (err) {
       parsed = null;
     }
@@ -1012,27 +1011,22 @@
   function getQuoteCMSData() {
     let parsed = null;
     try {
-      parsed = JSON.parse(localStorage.getItem(QUOTE_CMS_KEY) || 'null');
+      parsed = JSON.parse(CMS_STORAGE.getItem(QUOTE_CMS_KEY) || 'null');
     } catch (err) {
       parsed = null;
     }
     if (!parsed || typeof parsed !== 'object') return DEFAULT_QUOTE_CMS;
-    const email = String(parsed.destinationEmail || '').trim();
     return {
-      destinationEmail: EMAIL_RE.test(email) ? email : DEFAULT_QUOTE_CMS.destinationEmail,
       enabledRegions: normalizeQuoteRegions(parsed.enabledRegions, DEFAULT_QUOTE_CMS.enabledRegions)
     };
   }
 
   async function fetchQuoteCMSData() {
     try {
-      const response = await fetch('/api/content', { credentials: 'same-origin' });
+      const response = await fetch('/api/public-content', { credentials: 'same-origin' });
       if (!response.ok) return null;
       const data = await response.json();
-      const email = String(data && data.content && data.content.quote && data.content.quote.destinationEmail || '').trim();
-      if (!EMAIL_RE.test(email)) return null;
       return {
-        destinationEmail: email,
         enabledRegions: normalizeQuoteRegions(
           data && data.content && data.content.quote && data.content.quote.enabledRegions,
           DEFAULT_QUOTE_CMS.enabledRegions
@@ -1049,13 +1043,6 @@
     if (!forms.length) return;
     let quoteData = getQuoteCMSData();
 
-    function applyDestination(email) {
-      forms.forEach((form) => {
-        const destination = form.querySelector('[data-quote-destination]');
-        if (destination) destination.value = email;
-      });
-    }
-
     function fillRegions(regionSelect) {
       const regions = Array.isArray(quoteData.enabledRegions) ? quoteData.enabledRegions : Object.keys(CHILE_REGIONS_COMUNAS);
       regionSelect.innerHTML = '<option value="">Region de Chile</option>' +
@@ -1068,23 +1055,9 @@
         comunas.map(comuna => '<option value="' + comuna + '">' + comuna + '</option>').join('');
     }
 
-    function toMailBody(data) {
-      return [
-        'Nueva solicitud de cotizacion',
-        '',
-        'Nombre y Apellidos: ' + data.full_name,
-        'Region: ' + data.region,
-        'Comuna: ' + data.comuna,
-        'Correo de contacto: ' + data.contact_email,
-        'Numero de telefono: ' + data.contact_phone,
-        'Tipo de solicitud: ' + data.quote_type
-      ].join('\n');
-    }
-
     forms.forEach(form => {
       const regionSelect = form.querySelector('[data-quote-region]');
       const comunaSelect = form.querySelector('[data-quote-comuna]');
-      applyDestination(quoteData.destinationEmail);
 
       if (regionSelect && comunaSelect) {
         fillRegions(regionSelect);
@@ -1114,18 +1087,15 @@
 
         try {
           const payload = {
-            _subject: 'Solicitud de cotizacion PANSU',
-            _captcha: 'false',
-            nombre_apellidos: data.full_name,
+            full_name: data.full_name,
             region: data.region,
             comuna: data.comuna,
-            correo_contacto: data.contact_email,
-            telefono_contacto: data.contact_phone,
-            tipo_solicitud: data.quote_type,
-            detalle: toMailBody(data)
+            contact_email: data.contact_email,
+            contact_phone: data.contact_phone,
+            quote_type: data.quote_type
           };
 
-          const response = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(quoteData.destinationEmail), {
+          const response = await fetch('/api/quote-submit', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1159,7 +1129,7 @@
     });
 
     fetchQuoteCMSData().then((serverQuote) => {
-      if (!serverQuote || !serverQuote.destinationEmail) return;
+      if (!serverQuote) return;
       quoteData = serverQuote;
       forms.forEach((form) => {
         const regionSelect = form.querySelector('[data-quote-region]');
@@ -1172,7 +1142,6 @@
           }
         }
       });
-      applyDestination(quoteData.destinationEmail);
     }).catch(function () {});
   }
 
@@ -1189,7 +1158,6 @@
             '<div class="bg-default section-form-slider quote-modal-card">' +
               '<h5 id="quoteMobileModalLabel">Solicita una cotizacion para una instalacion de paneles solares residencial o comercial</h5>' +
               '<form class="rd-mailform text-center offset-top-30 quote-modal-form" data-quote-form data-form-output="form-output-global" data-form-type="contact" method="post" action="#">' +
-                '<input type="hidden" name="destination_email" data-quote-destination value="">' +
                 '<div class="form-wrap">' +
                   '<label class="form-label" for="contact-name-mobile">Nombre y Apellidos</label>' +
                   '<input class="form-input" id="contact-name-mobile" type="text" name="full_name" placeholder="Nombre y Apellidos" data-constraints="@Required">' +
@@ -1256,7 +1224,7 @@
 
     let parsed = null;
     try {
-      parsed = JSON.parse(localStorage.getItem(SOCIAL_CMS_KEY) || 'null');
+      parsed = JSON.parse(CMS_STORAGE.getItem(SOCIAL_CMS_KEY) || 'null');
     } catch (err) {
       parsed = null;
     }
@@ -1294,7 +1262,7 @@
     }
     let parsed = null;
     try {
-      parsed = JSON.parse(localStorage.getItem(FAQ_CMS_KEY) || 'null');
+      parsed = JSON.parse(CMS_STORAGE.getItem(FAQ_CMS_KEY) || 'null');
     } catch (err) {
       parsed = null;
     }
@@ -1348,7 +1316,7 @@
     }
     let parsed = null;
     try {
-      parsed = JSON.parse(localStorage.getItem(WHY_CMS_KEY) || 'null');
+      parsed = JSON.parse(CMS_STORAGE.getItem(WHY_CMS_KEY) || 'null');
     } catch (err) {
       parsed = null;
     }
@@ -1406,7 +1374,7 @@
     }
     let parsed = null;
     try {
-      parsed = JSON.parse(localStorage.getItem(KPIS_CMS_KEY) || 'null');
+      parsed = JSON.parse(CMS_STORAGE.getItem(KPIS_CMS_KEY) || 'null');
     } catch (err) {
       parsed = null;
     }

@@ -21,3 +21,13 @@
   from = "/api/content"
   to = "/.netlify/functions/content-v2"
   status = 200
+
+[[redirects]]
+  from = "/api/public-content"
+  to = "/.netlify/functions/public-content"
+  status = 200
+
+[[redirects]]
+  from = "/api/quote-submit"
+  to = "/.netlify/functions/quote-submit"
+  status = 200

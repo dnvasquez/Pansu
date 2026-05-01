@@ -1,6 +1,20 @@
 (function () {
   'use strict';
 
+  try {
+    var storage = window.sessionStorage || window.localStorage;
+    if (storage) {
+      var probe = '__pansur_storage_probe__';
+      storage.setItem(probe, '1');
+      storage.removeItem(probe);
+      window.PansurStorage = storage;
+    } else {
+      window.PansurStorage = window.localStorage;
+    }
+  } catch (err) {
+    window.PansurStorage = window.localStorage;
+  }
+
   function ensureLogoutButton() {
     var nav = document.querySelector('.admin-nav');
     if (!nav || nav.querySelector('[data-admin-logout]')) return;

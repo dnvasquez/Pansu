@@ -22,6 +22,7 @@
       'images/slide-01.jpg'
     ]
   };
+  var storage = window.PansurStorage || window.sessionStorage || window.localStorage;
 
   function byId(id) { return document.getElementById(id); }
   function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
@@ -56,7 +57,7 @@
 
   function loadData() {
     try {
-      var parsed = JSON.parse(localStorage.getItem(KEY) || 'null');
+      var parsed = JSON.parse(storage.getItem(KEY) || 'null');
       var data = normalize(parsed);
       if (data) return data;
     } catch (err) {}
@@ -162,7 +163,7 @@
         if (window.PansurCMS) {
           await window.PansurCMS.saveSection(SECTION, data);
         } else {
-          localStorage.setItem(KEY, JSON.stringify(data));
+          storage.setItem(KEY, JSON.stringify(data));
         }
         setStatus('Header actualizado correctamente.', true);
       } catch (err) {
@@ -176,7 +177,7 @@
           await window.PansurCMS.resetSection(SECTION);
           await window.PansurCMS.syncFromServer();
         } else {
-          localStorage.removeItem(KEY);
+          storage.removeItem(KEY);
         }
         fill(clone(DEFAULTS));
         if (window.PansurCMS) fill(loadData());

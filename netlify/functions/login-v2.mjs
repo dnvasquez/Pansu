@@ -1,4 +1,39 @@
-import { buildCookie, createToken } from './_lib/auth.mjs';
+import { buildCookie, createToken, normalizeOtp, verifyTotp } from './_lib/auth.mjs';
+
+const LOGIN_WINDOW_MS = 10 * 60 * 1000;
+const LOGIN_MAX_ATTEMPTS = 5;
+const loginAttempts = new Map();
+
+function getClientIp(request) {
+  const forwarded = String(request.headers.get('x-forwarded-for') || '').split(',')[0].trim();
+  return forwarded || 'unknown';
+}
+
+function getLoginState(ip) {
+  const now = Date.now();
+  const current = loginAttempts.get(ip);
+  if (!current || now > current.resetAt) {
+    const fresh = { count: 0, resetAt: now + LOGIN_WINDOW_MS };
+    loginAttempts.set(ip, fresh);
+    return fresh;
+  }
+  return current;
+}
+
+function isLoginRateLimited(ip) {
+  return getLoginState(ip).count >= LOGIN_MAX_ATTEMPTS;
+}
+
+function registerLoginFailure(ip) {
+  const state = getLoginState(ip);
+  state.count += 1;
+  state.resetAt = Math.max(state.resetAt, Date.now() + LOGIN_WINDOW_MS);
+  loginAttempts.set(ip, state);
+}
+
+function clearLoginAttempts(ip) {
+  if (ip) loginAttempts.delete(ip);
+}
 
 function json(payload, status = 200, headers = {}) {
   return new Response(JSON.stringify(payload), {
@@ -32,17 +67,32 @@ export default async function handler(request) {
 
   const username = String(body.username || '').trim();
   const password = String(body.password || '');
+  const otp = normalizeOtp(body.otp || '');
   const expectedUser = process.env.CMS_USER || '';
   const expectedPass = process.env.CMS_PASS || '';
+  const otpSecret = String(process.env.CMS_OTP_SECRET || '').trim();
+  const ip = getClientIp(request);
 
   if (!expectedUser || !expectedPass) {
     return json({ ok: false, message: 'CMS no configurado' }, 500);
   }
 
-  if (username !== expectedUser || password !== expectedPass) {
+  if (isLoginRateLimited(ip)) {
+    return json({ ok: false, message: 'Demasiados intentos. Intenta nuevamente mas tarde.' }, 429);
+  }
+
+  const passwordOk = username === expectedUser && password === expectedPass;
+  const otpOk = !otpSecret || verifyTotp(otpSecret, otp);
+
+  if (!passwordOk || !otpOk) {
+    registerLoginFailure(ip);
+    if (passwordOk && otpSecret && !otpOk) {
+      return json({ ok: false, message: 'Codigo de verificacion invalido' }, 401);
+    }
     return json({ ok: false, message: 'Credenciales invalidas' }, 401);
   }
 
+  clearLoginAttempts(ip);
   const token = createToken(username);
   return json(
     { ok: true, redirect: sanitizeNext(body.next) },

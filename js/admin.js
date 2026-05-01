@@ -4,6 +4,7 @@
   var SECTION = 'products';
   var KEY = 'pansur_products_cms_v2';
   var LEGACY_KEY = 'pansur_products_cms_v1';
+  var storage = window.PansurStorage || window.sessionStorage || window.localStorage;
   var TITLE_MAX = 80;
   var DESCRIPTION_MAX = 360;
   var IMAGE_URL_MAX = 500;
@@ -61,7 +62,7 @@
   function loadData() {
     var parsed = null;
     try {
-      parsed = JSON.parse(localStorage.getItem(KEY) || 'null');
+      parsed = JSON.parse(storage.getItem(KEY) || 'null');
     } catch (err) {
       parsed = null;
     }
@@ -69,7 +70,7 @@
     if (valid) return valid;
 
     try {
-      var legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || 'null');
+      var legacy = JSON.parse(storage.getItem(LEGACY_KEY) || 'null');
       if (Array.isArray(legacy) && legacy.length >= 3) {
         var migrated = clone(DEFAULT_DATA);
         for (var i = 0; i < 3; i += 1) {
@@ -93,7 +94,7 @@
       await window.PansurCMS.saveSection(SECTION, state);
       return;
     }
-    localStorage.setItem(KEY, JSON.stringify(state));
+    storage.setItem(KEY, JSON.stringify(state));
   }
 
   function setStatus(message, ok) {
@@ -321,7 +322,7 @@
           await window.PansurCMS.syncFromServer();
           state = loadData();
         } else {
-          localStorage.removeItem(KEY);
+          storage.removeItem(KEY);
           state = clone(DEFAULT_DATA);
         }
         render();
