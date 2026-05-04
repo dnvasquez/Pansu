@@ -1072,10 +1072,14 @@
       form.addEventListener('submit', async function (e) {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(form).entries());
-        const required = ['full_name', 'region', 'comuna', 'contact_email', 'contact_phone', 'quote_type'];
+        const required = ['full_name', 'region', 'comuna', 'contact_email', 'contact_phone', 'quote_type', 'privacy_consent'];
         const valid = required.every(key => String(data[key] || '').trim() !== '');
         if (!valid) {
           alert('Completa todos los campos para enviar la solicitud.');
+          return;
+        }
+        if (!String(data.privacy_consent || '').trim()) {
+          alert('Debes aceptar la politica de privacidad para enviar la solicitud.');
           return;
         }
         const submitBtn = form.querySelector('button[type="submit"]');
@@ -1092,7 +1096,9 @@
             comuna: data.comuna,
             contact_email: data.contact_email,
             contact_phone: data.contact_phone,
-            quote_type: data.quote_type
+            quote_type: data.quote_type,
+            privacy_consent: data.privacy_consent,
+            website: data.website
           };
 
           const response = await fetch('/api/quote-submit', {
@@ -1103,8 +1109,11 @@
             },
             body: JSON.stringify(payload)
           });
+          const result = await response.json().catch(() => null);
 
-          if (!response.ok) throw new Error('Solicitud no enviada');
+          if (!response.ok || !result || !result.ok) {
+            throw new Error((result && result.message) || 'Solicitud no enviada');
+          }
 
           alert('Solicitud enviada correctamente. Te contactaremos pronto.');
           form.reset();
@@ -1118,7 +1127,7 @@
           const formWraps = form.querySelectorAll('.form-wrap');
           formWraps.forEach(wrap => wrap.classList.remove('has-value'));
         } catch (err) {
-          alert('No se pudo enviar la solicitud en este momento. Intenta nuevamente.');
+          alert((err && err.message) || 'No se pudo enviar la solicitud en este momento. Intenta nuevamente.');
         } finally {
           if (submitBtn) {
             submitBtn.disabled = false;
@@ -1180,12 +1189,22 @@
                   '<label class="form-label" for="contact-phone-mobile">Numero de telefono</label>' +
                   '<input class="form-input" id="contact-phone-mobile" type="text" name="contact_phone" placeholder="+56 9 XXXX XXXX" data-constraints="@Numeric @Required">' +
                 '</div>' +
-                '<div class="form-wrap">' +
+              '<div class="form-wrap">' +
                   '<select class="form-input select-filter" name="quote_type" data-placeholder="Tipo de solicitud" data-minimum-results-search="Infinity" data-constraints="@Required">' +
                     '<option value="">Tipo de solicitud</option>' +
                     '<option value="Residencia">Residencia</option>' +
                     '<option value="Comercial">Comercial</option>' +
                   '</select>' +
+                '</div>' +
+                '<div class="form-wrap d-none" aria-hidden="true">' +
+                  '<label class="form-label" for="quote-website-mobile">Website</label>' +
+                  '<input class="form-input" id="quote-website-mobile" type="text" name="website" tabindex="-1" autocomplete="off">' +
+                '</div>' +
+                '<div class="form-wrap text-start">' +
+                  '<div class="form-check">' +
+                    '<input class="form-check-input" id="quote-privacy-consent-mobile" type="checkbox" name="privacy_consent" value="1" required>' +
+                    '<label class="form-check-label" for="quote-privacy-consent-mobile">Acepto la <a href="privacidad.html" rel="noopener">Politica de Privacidad</a> y entiendo que mis datos se usarán únicamente para gestionar y responder esta cotización.</label>' +
+                  '</div>' +
                 '</div>' +
                 '<button class="btn btn-primary offset-top-30" type="submit">SOLICITAR COTIZACION</button>' +
               '</form>' +

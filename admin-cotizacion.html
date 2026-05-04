@@ -60,13 +60,13 @@
             <div class="admin-hero-badge" data-section-visibility-ticket="quote" data-section-label="Solicitud de cotización" data-section-help="Oculta o muestra el bloque de formularios y llamados a cotizar."></div>
           </div>
         </div>
-        <p class="small-note mb-3">Define el correo de destino y las regiones disponibles para los formularios de cotización.</p>
+        <p class="small-note mb-3">Define el correo de notificación interno y las regiones disponibles para los formularios de cotización.</p>
 
         <form id="quote-cms-form">
           <div class="admin-card">
             <div class="row g-3">
               <div class="col-md-8">
-                <label class="form-label" for="quote-destination-email">Correo destino de solicitudes</label>
+                <label class="form-label" for="quote-destination-email">Correo de notificación del equipo</label>
                 <input class="form-control" id="quote-destination-email" type="email" maxlength="120" required>
               </div>
             </div>
@@ -90,6 +90,18 @@
           </div>
           <p class="status mt-3 mb-0" id="status"></p>
         </form>
+
+        <div class="admin-card mt-4">
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+            <div>
+              <h2 class="h5 m-0">Solicitudes recibidas</h2>
+              <p class="small-note mb-0">Se almacenan en el backend del sitio y puedes revisarlas aquí.</p>
+            </div>
+          </div>
+          <div id="quote-submissions-list" class="table-responsive">
+            <p class="small-note mb-0">Cargando solicitudes...</p>
+          </div>
+        </div>
       </main>
     </div>
 

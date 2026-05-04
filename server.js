@@ -8,19 +8,43 @@ const HOST = process.env.HOST || '0.0.0.0';
 const PORT = Number(process.env.PORT || 3000);
 const ROOT = __dirname;
 
+function loadEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) return;
+  try {
+    const raw = fs.readFileSync(filePath, 'utf8');
+    raw.split(/\r?\n/).forEach((line) => {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) return;
+      const idx = trimmed.indexOf('=');
+      if (idx === -1) return;
+      const key = trimmed.slice(0, idx).trim();
+      const value = trimmed.slice(idx + 1).trim().replace(/^["']|["']$/g, '');
+      if (key && typeof process.env[key] === 'undefined') {
+        process.env[key] = value;
+      }
+    });
+  } catch (err) {}
+}
+
+loadEnvFile(path.join(ROOT, '.env.local'));
+loadEnvFile(path.join(ROOT, '.env'));
+
 const CMS_USER = process.env.CMS_USER || '';
 const CMS_PASS = process.env.CMS_PASS || '';
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 const DEFAULTS_PATH = path.join(ROOT, 'data', 'default-content.json');
 const LOCAL_CONTENT_PATH = path.join(ROOT, 'data', 'local-content.json');
+const QUOTE_SUBMISSIONS_PATH = path.join(ROOT, 'data', 'quote-submissions.json');
+const AUDIT_LOG_PATH = path.join(ROOT, 'data', 'security-audit.log');
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SAFE_HREF_RE = /^(?:https?:|mailto:|tel:|#|\/(?!\/))/i;
 const LOGIN_WINDOW_MS = 10 * 60 * 1000;
 const LOGIN_MAX_ATTEMPTS = 5;
 const QUOTE_WINDOW_MS = 10 * 60 * 1000;
 const QUOTE_MAX_ATTEMPTS = 5;
-const TOTP_STEP_SEC = 30;
-const TOTP_DIGITS = 6;
+const CSRF_SECRET = String(
+  process.env.CMS_CSRF_SECRET || process.env.CMS_PASS || 'pansu-csrf-secret'
+).trim();
 
 const sessions = new Map();
 const loginAttempts = new Map();
@@ -49,7 +73,20 @@ function buildSecurityHeaders(req, extraHeaders = {}) {
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+    'Content-Security-Policy': [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "form-action 'self'",
+      "script-src 'self' https://cdn.jsdelivr.net",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+      "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com data:",
+      "img-src 'self' data: https://www.google.com https://maps.gstatic.com https://maps.googleapis.com",
+      "frame-src https://www.google.com",
+      "connect-src 'self'"
+    ].join('; ')
   }, extraHeaders);
   if (isSecureRequest(req)) {
     headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains';
@@ -157,6 +194,54 @@ function clearQuoteAttempts(ip) {
   if (ip) quoteAttempts.delete(ip);
 }
 
+function getCsrfToken(sessionToken) {
+  if (!sessionToken) return null;
+  return crypto.createHmac('sha256', CSRF_SECRET).update(sessionToken).digest('hex');
+}
+
+function isValidCsrfToken(sessionToken, token) {
+  const expected = getCsrfToken(sessionToken);
+  if (!expected || !token) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(String(token)));
+  } catch (err) {
+    return false;
+  }
+}
+
+function appendAuditLog(event, details = {}) {
+  const entry = Object.assign({
+    timestamp: new Date().toISOString(),
+    event: String(event || 'unknown')
+  }, details);
+  const line = JSON.stringify(entry);
+  try {
+    fs.appendFileSync(AUDIT_LOG_PATH, line + '\n', 'utf8');
+  } catch (err) {}
+  console.log('[audit] ' + line);
+}
+
+function readQuoteSubmissions() {
+  if (!fs.existsSync(QUOTE_SUBMISSIONS_PATH)) return [];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(QUOTE_SUBMISSIONS_PATH, 'utf8'));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+function writeQuoteSubmissions(submissions) {
+  fs.writeFileSync(QUOTE_SUBMISSIONS_PATH, JSON.stringify(submissions, null, 2), 'utf8');
+  return submissions;
+}
+
+function appendQuoteSubmission(submission) {
+  const current = readQuoteSubmissions();
+  current.unshift(submission);
+  return writeQuoteSubmissions(current.slice(0, 200));
+}
+
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
@@ -189,55 +274,6 @@ function sanitizeHref(value) {
   const href = String(value || '').trim();
   if (!href) return '#';
   return SAFE_HREF_RE.test(href) ? href : '#';
-}
-
-function normalizeOtp(otp) {
-  return String(otp || '').replace(/\s+/g, '').replace(/[^0-9]/g, '');
-}
-
-function decodeBase32(secret) {
-  const normalized = String(secret || '').toUpperCase().replace(/=+/g, '').replace(/\s+/g, '');
-  if (!normalized) return Buffer.alloc(0);
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-  let bits = '';
-  for (const char of normalized) {
-    const idx = alphabet.indexOf(char);
-    if (idx === -1) return Buffer.from(secret, 'utf8');
-    bits += idx.toString(2).padStart(5, '0');
-  }
-  const bytes = [];
-  for (let i = 0; i + 8 <= bits.length; i += 8) {
-    bytes.push(parseInt(bits.slice(i, i + 8), 2));
-  }
-  return Buffer.from(bytes);
-}
-
-function createTotp(secret, timeMs = Date.now()) {
-  const key = decodeBase32(secret);
-  if (!key.length) return null;
-  const counter = Math.floor(timeMs / 1000 / TOTP_STEP_SEC);
-  const buffer = Buffer.alloc(8);
-  buffer.writeBigUInt64BE(BigInt(counter));
-  const hmac = crypto.createHmac('sha1', key).update(buffer).digest();
-  const offset = hmac[hmac.length - 1] & 0x0f;
-  const code = ((hmac[offset] & 0x7f) << 24)
-    | ((hmac[offset + 1] & 0xff) << 16)
-    | ((hmac[offset + 2] & 0xff) << 8)
-    | (hmac[offset + 3] & 0xff);
-  return String(code % (10 ** TOTP_DIGITS)).padStart(TOTP_DIGITS, '0');
-}
-
-function verifyTotp(secret, otp, timeMs = Date.now(), window = 1) {
-  const normalized = normalizeOtp(otp);
-  if (!normalized) return false;
-  const target = normalized.padStart(TOTP_DIGITS, '0').slice(-TOTP_DIGITS);
-  for (let offset = -window; offset <= window; offset += 1) {
-    const candidate = createTotp(secret, timeMs + offset * TOTP_STEP_SEC * 1000);
-    if (candidate && crypto.timingSafeEqual(Buffer.from(candidate), Buffer.from(target))) {
-      return true;
-    }
-  }
-  return false;
 }
 
 function normalizeVisibility(raw, defaults) {
@@ -387,7 +423,8 @@ function buildQuoteBody(data) {
     'Comuna: ' + data.comuna,
     'Correo de contacto: ' + data.contact_email,
     'Numero de telefono: ' + data.contact_phone,
-    'Tipo de solicitud: ' + data.quote_type
+    'Tipo de solicitud: ' + data.quote_type,
+    'Consentimiento privacidad: ' + (data.privacy_consent ? 'Aceptado' : 'No informado')
   ].join('\n');
 }
 
@@ -437,35 +474,37 @@ const server = http.createServer(async (req, res) => {
       }
       const ip = getClientIp(req);
       if (isLoginRateLimited(ip)) {
+        appendAuditLog('login_blocked', { ip, reason: 'rate_limited' });
         return send(req, res, 429, JSON.stringify({ ok: false, message: 'Demasiados intentos. Intenta nuevamente más tarde.' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
       }
       const raw = await readBody(req);
       const payload = JSON.parse(raw || '{}');
       const username = String(payload.username || '');
       const password = String(payload.password || '');
-      const otp = String(payload.otp || '');
       const next = sanitizeNext(String(payload.next || '/admin-header.html'));
-      const mfaSecret = String(process.env.CMS_OTP_SECRET || '').trim();
 
       const passwordOk = username === CMS_USER && password === CMS_PASS;
-      const otpOk = !mfaSecret || verifyTotp(mfaSecret, otp);
 
-      if (passwordOk && otpOk) {
+      if (passwordOk) {
         clearLoginAttempts(ip);
         const token = createSession();
+        const csrfToken = getCsrfToken(token);
         const maxAgeSec = Math.floor(SESSION_TTL_MS / 1000);
         const secureCookie = req.headers['x-forwarded-proto'] === 'https' || req.headers['X-Forwarded-Proto'] === 'https';
         res.setHeader(
           'Set-Cookie',
           `cms_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSec}${secureCookie ? '; Secure' : ''}`
         );
-        return send(req, res, 200, JSON.stringify({ ok: true, redirect: next }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
+        appendAuditLog('login_success', { ip, username });
+        return send(req, res, 200, JSON.stringify({ ok: true, redirect: next, csrfToken }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
       }
 
       registerLoginFailure(ip);
-      if (passwordOk && mfaSecret && !otpOk) {
-        return send(req, res, 401, JSON.stringify({ ok: false, message: 'Codigo de verificacion invalido' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
-      }
+      appendAuditLog('login_failed', {
+        ip,
+        username,
+        reason: 'invalid_credentials'
+      });
       return send(req, res, 401, JSON.stringify({ ok: false, message: 'Credenciales invalidas' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
     } catch (err) {
       return send(req, res, 400, JSON.stringify({ ok: false, message: 'Solicitud invalida' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
@@ -473,13 +512,18 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/api/logout' && method === 'POST') {
+    if (!isValidCsrfToken(sessionToken, req.headers['x-csrf-token'])) {
+      appendAuditLog('logout_blocked', { ip: getClientIp(req), reason: 'csrf_invalid' });
+      return send(req, res, 403, JSON.stringify({ ok: false, message: 'Token CSRF invalido' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
+    }
     clearSession(sessionToken);
+    appendAuditLog('logout', { ip: getClientIp(req) });
     res.setHeader('Set-Cookie', 'cms_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
     return send(req, res, 200, JSON.stringify({ ok: true }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
   }
 
   if (pathname === '/api/session' && method === 'GET') {
-    return send(req, res, 200, JSON.stringify({ authenticated }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
+    return send(req, res, 200, JSON.stringify({ authenticated, csrfToken: authenticated ? getCsrfToken(sessionToken) : null }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
   }
 
   if (pathname === '/api/public-content' && method === 'GET') {
@@ -490,17 +534,29 @@ const server = http.createServer(async (req, res) => {
     try {
       const ip = getClientIp(req);
       if (isQuoteRateLimited(ip)) {
+        appendAuditLog('quote_blocked', { ip, reason: 'rate_limited' });
         return send(req, res, 429, JSON.stringify({ ok: false, message: 'Demasiadas solicitudes. Intenta nuevamente mas tarde.' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
       }
 
       const raw = await readBody(req);
       const payload = JSON.parse(raw || '{}');
-      const fullName = String(payload.full_name || '').trim();
-      const region = String(payload.region || '').trim();
-      const comuna = String(payload.comuna || '').trim();
-      const contactEmail = String(payload.contact_email || '').trim();
-      const contactPhone = String(payload.contact_phone || '').trim();
-      const quoteType = String(payload.quote_type || '').trim();
+      const fullName = String(payload.full_name || '').trim().slice(0, 120);
+      const region = String(payload.region || '').trim().slice(0, 80);
+      const comuna = String(payload.comuna || '').trim().slice(0, 80);
+      const contactEmail = String(payload.contact_email || '').trim().slice(0, 120);
+      const contactPhone = String(payload.contact_phone || '').trim().slice(0, 40);
+      const quoteType = String(payload.quote_type || '').trim().slice(0, 40);
+      const privacyConsent = String(payload.privacy_consent || '').trim();
+      const honeypot = String(payload.website || '').trim();
+      const consentAccepted = /^(1|true|yes|on)$/i.test(privacyConsent);
+
+      if (honeypot) {
+        appendAuditLog('quote_spam', {
+          ip,
+          userAgent: String(req.headers['user-agent'] || '').slice(0, 200)
+        });
+        return send(req, res, 200, JSON.stringify({ ok: true }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
+      }
 
       if (!fullName || !region || !comuna || !contactEmail || !contactPhone || !quoteType) {
         return send(req, res, 400, JSON.stringify({ ok: false, message: 'Completa todos los campos para enviar la solicitud.' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
@@ -508,56 +564,72 @@ const server = http.createServer(async (req, res) => {
       if (!EMAIL_RE.test(contactEmail)) {
         return send(req, res, 400, JSON.stringify({ ok: false, message: 'Debes ingresar un correo valido.' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
       }
+      if (!consentAccepted) {
+        return send(req, res, 400, JSON.stringify({ ok: false, message: 'Debes aceptar la politica de privacidad para enviar la solicitud.' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
+      }
+      if (!/^(Residencia|Comercial)$/i.test(quoteType)) {
+        return send(req, res, 400, JSON.stringify({ ok: false, message: 'Tipo de solicitud invalido' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
+      }
 
       const content = readContent();
       const quote = content.quote && typeof content.quote === 'object' ? content.quote : {};
       const destinationEmail = String(quote.destinationEmail || '').trim();
       const enabledRegions = Array.isArray(quote.enabledRegions) ? quote.enabledRegions : [];
-
-      if (!EMAIL_RE.test(destinationEmail)) {
-        return send(req, res, 500, JSON.stringify({ ok: false, message: 'Configuracion de cotizacion invalida' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
+      const notificationEmail = EMAIL_RE.test(destinationEmail) ? destinationEmail : '';
+      if (destinationEmail && !notificationEmail) {
+        appendAuditLog('quote_config_warning', { ip, reason: 'invalid_notification_email' });
       }
       if (enabledRegions.length && enabledRegions.indexOf(region) === -1) {
         return send(req, res, 400, JSON.stringify({ ok: false, message: 'La region seleccionada no esta habilitada' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
       }
-
-      const formsubmitResponse = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(destinationEmail), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          _subject: 'Solicitud de cotizacion PANSU',
-          _captcha: 'false',
-          nombre_apellidos: fullName,
-          region: region,
-          comuna: comuna,
-          correo_contacto: contactEmail,
-          telefono_contacto: contactPhone,
-          tipo_solicitud: quoteType,
-          detalle: buildQuoteBody({
-            full_name: fullName,
-            region: region,
-            comuna: comuna,
-            contact_email: contactEmail,
-            contact_phone: contactPhone,
-            quote_type: quoteType
-          })
+      const submission = {
+        id: crypto.randomUUID(),
+        receivedAt: new Date().toISOString(),
+        status: 'stored',
+        fullName,
+        region,
+        comuna,
+        contactEmail,
+        contactPhone,
+        quoteType,
+        privacyConsent: true,
+        notificationEmail,
+        ip,
+        userAgent: String(req.headers['user-agent'] || '').slice(0, 200),
+        referer: String(req.headers.referer || '').slice(0, 200),
+        summary: buildQuoteBody({
+          full_name: fullName,
+          region,
+          comuna,
+          contact_email: contactEmail,
+          contact_phone: contactPhone,
+          quote_type: quoteType,
+          privacy_consent: true
         })
+      };
+
+      appendQuoteSubmission(submission);
+      appendAuditLog('quote_received', {
+        ip,
+        submissionId: submission.id,
+        region,
+        quoteType
       });
-
-      if (!formsubmitResponse.ok) {
-        registerQuoteFailure(ip);
-        return send(req, res, 502, JSON.stringify({ ok: false, message: 'No se pudo enviar la solicitud en este momento.' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
-      }
-
       clearQuoteAttempts(ip);
-      return send(req, res, 200, JSON.stringify({ ok: true }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
+      return send(req, res, 200, JSON.stringify({ ok: true, submissionId: submission.id, message: 'Solicitud recibida correctamente.' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
     } catch (err) {
+      appendAuditLog('quote_error', { ip: getClientIp(req), message: String(err && err.message || 'error').slice(0, 120) });
       registerQuoteFailure(getClientIp(req));
       return send(req, res, 400, JSON.stringify({ ok: false, message: 'Solicitud invalida' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
     }
+  }
+
+  if (pathname === '/api/quote-submissions' && method === 'GET') {
+    if (!authenticated) {
+      return send(req, res, 401, JSON.stringify({ ok: false, message: 'Sesion no valida' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
+    }
+    const submissions = readQuoteSubmissions().slice(0, 50);
+    return send(req, res, 200, JSON.stringify({ ok: true, submissions }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
   }
 
   if (pathname === '/api/content' && method === 'GET') {
@@ -571,6 +643,10 @@ const server = http.createServer(async (req, res) => {
     if (!authenticated) {
       return send(req, res, 401, JSON.stringify({ ok: false, message: 'Sesion no valida' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
     }
+    if (!isValidCsrfToken(sessionToken, req.headers['x-csrf-token'])) {
+      appendAuditLog('content_blocked', { ip: getClientIp(req), reason: 'csrf_invalid' });
+      return send(req, res, 403, JSON.stringify({ ok: false, message: 'Token CSRF invalido' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
+    }
     try {
       const raw = await readBody(req);
       const payload = JSON.parse(raw || '{}');
@@ -579,8 +655,10 @@ const server = http.createServer(async (req, res) => {
         return send(req, res, 400, JSON.stringify({ ok: false, message: 'Seccion requerida' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
       }
       const content = payload.reset ? resetSection(section) : updateSection(section, payload.data);
+      appendAuditLog(payload.reset ? 'content_reset' : 'content_saved', { ip: getClientIp(req), section });
       return send(req, res, 200, JSON.stringify({ ok: true, content, section, data: content[section] }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
     } catch (err) {
+      appendAuditLog('content_error', { ip: getClientIp(req), message: String(err && err.message || 'error').slice(0, 120) });
       return send(req, res, 400, JSON.stringify({ ok: false, message: 'No se pudo guardar la seccion solicitada' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
     }
   }
@@ -609,4 +687,5 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, HOST, () => {
   console.log(`Servidor listo en http://${HOST}:${PORT}`);
   console.log('Credenciales CMS desde variables de entorno CMS_USER y CMS_PASS.');
+  console.log('Las solicitudes de cotizacion se almacenan en data/quote-submissions.json.');
 });

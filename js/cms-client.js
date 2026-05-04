@@ -15,25 +15,62 @@
     savings: 'pansur_savings_cms_v1'
   };
   var storage = window.PansurStorage || window.sessionStorage || window.localStorage;
+  var csrfToken = null;
 
   function redirectToLogin() {
     var next = encodeURIComponent(window.location.pathname || '/admin-header.html');
     window.location.href = '/login.html?next=' + next;
   }
 
+  function setCsrfToken(token) {
+    csrfToken = token || null;
+    try {
+      if (csrfToken) {
+        window.PansurCMSCsrfToken = csrfToken;
+      } else {
+        delete window.PansurCMSCsrfToken;
+      }
+    } catch (err) {}
+  }
+
+  async function ensureCsrfToken() {
+    if (csrfToken) return csrfToken;
+    try {
+      var session = await getSession();
+      return session && session.csrfToken ? session.csrfToken : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
   async function request(url, options) {
-    var response = await fetch(url, Object.assign({
+    var opts = Object.assign({
       credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json'
       }
-    }, options || {}));
+    }, options || {});
+    var method = String(opts.method || 'GET').toUpperCase();
+    if (opts.skipCsrf) {
+      delete opts.skipCsrf;
+    } else if (!/^(GET|HEAD|OPTIONS|TRACE)$/.test(method)) {
+      var token = await ensureCsrfToken();
+      if (token) {
+        opts.headers = Object.assign({}, opts.headers, { 'X-CSRF-Token': token });
+      }
+    }
+
+    var response = await fetch(url, opts);
 
     var data = null;
     try {
       data = await response.json();
     } catch (err) {
       data = null;
+    }
+
+    if (data && data.csrfToken) {
+      setCsrfToken(data.csrfToken);
     }
 
     if (!response.ok) {
@@ -82,7 +119,7 @@
   }
 
   async function getSession() {
-    return request('/api/session', { method: 'GET', headers: {} });
+    return request('/api/session', { method: 'GET', headers: {}, skipCsrf: true });
   }
 
   async function requireAuth() {
@@ -106,6 +143,8 @@
     resetSection: resetSection,
     getSession: getSession,
     requireAuth: requireAuth,
-    logout: logout
+    logout: logout,
+    setCsrfToken: setCsrfToken,
+    ensureCsrfToken: ensureCsrfToken
   };
 })();
