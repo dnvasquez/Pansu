@@ -87,74 +87,6 @@
     el.style.color = ok ? '#1f7a1f' : '#b02020';
   }
 
-  function escapeHtml(value) {
-    return String(value || '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
-
-  function formatSubmissionDate(value) {
-    try {
-      return new Date(value).toLocaleString('es-CL');
-    } catch (err) {
-      return String(value || '');
-    }
-  }
-
-  function renderSubmissions(container, submissions) {
-    if (!container) return;
-    if (!Array.isArray(submissions) || !submissions.length) {
-      container.innerHTML = '<p class="small-note mb-0">Aun no hay solicitudes registradas.</p>';
-      return;
-    }
-
-    var rows = submissions.map(function (item) {
-      return '' +
-        '<tr>' +
-          '<td>' + escapeHtml(formatSubmissionDate(item.receivedAt)) + '</td>' +
-          '<td>' +
-            '<strong>' + escapeHtml(item.fullName) + '</strong><br>' +
-            '<span class="small-note">' + escapeHtml(item.contactEmail) + ' | ' + escapeHtml(item.contactPhone) + '</span>' +
-          '</td>' +
-          '<td>' + escapeHtml(item.region) + '<br><span class="small-note">' + escapeHtml(item.comuna) + '</span></td>' +
-          '<td>' + escapeHtml(item.quoteType) + '</td>' +
-          '<td>' + escapeHtml(item.status || 'stored') + '</td>' +
-        '</tr>';
-    }).join('');
-
-    container.innerHTML = '' +
-      '<table class="table table-sm align-middle mb-0">' +
-        '<thead>' +
-          '<tr>' +
-            '<th>Fecha</th>' +
-            '<th>Contacto</th>' +
-            '<th>Ubicacion</th>' +
-            '<th>Tipo</th>' +
-            '<th>Estado</th>' +
-          '</tr>' +
-        '</thead>' +
-        '<tbody>' + rows + '</tbody>' +
-      '</table>';
-  }
-
-  async function loadSubmissions() {
-    var container = byId('quote-submissions-list');
-    if (!container) return;
-    try {
-      var response = await fetch('/api/quote-submissions', { credentials: 'same-origin' });
-      var data = await response.json().catch(function () { return null; });
-      if (!response.ok || !data || !data.ok) {
-        throw new Error((data && data.message) || 'No se pudieron cargar las solicitudes');
-      }
-      renderSubmissions(container, Array.isArray(data.submissions) ? data.submissions.slice(0, 10) : []);
-    } catch (err) {
-      container.innerHTML = '<p class="small-note mb-0">No se pudieron cargar las solicitudes recibidas.</p>';
-    }
-  }
-
   async function init() {
     var form = byId('quote-cms-form');
     var resetBtn = byId('reset-btn');
@@ -172,7 +104,6 @@
     var initialData = loadData();
     emailInput.value = initialData.destinationEmail || DEFAULTS.destinationEmail;
     renderRegions(regionsList, Array.isArray(initialData.enabledRegions) ? initialData.enabledRegions : DEFAULTS.enabledRegions);
-    loadSubmissions().catch(function () {});
 
     selectAllBtn.addEventListener('click', function () {
       renderRegions(regionsList, REGIONS);
@@ -206,7 +137,6 @@
           }));
         }
         setStatus('Cotizacion actualizada correctamente.', true);
-        loadSubmissions().catch(function () {});
       } catch (err) {
         setStatus('No se pudo guardar la configuracion de cotizacion.', false);
       }
@@ -224,7 +154,6 @@
         emailInput.value = resetData.destinationEmail || DEFAULTS.destinationEmail;
         renderRegions(regionsList, Array.isArray(resetData.enabledRegions) ? resetData.enabledRegions : DEFAULTS.enabledRegions);
         setStatus('Se restauraron los valores por defecto.', true);
-        loadSubmissions().catch(function () {});
       } catch (err) {
         setStatus('No se pudo restaurar la configuracion de cotizacion.', false);
       }

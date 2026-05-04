@@ -624,14 +624,6 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  if (pathname === '/api/quote-submissions' && method === 'GET') {
-    if (!authenticated) {
-      return send(req, res, 401, JSON.stringify({ ok: false, message: 'Sesion no valida' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
-    }
-    const submissions = readQuoteSubmissions().slice(0, 50);
-    return send(req, res, 200, JSON.stringify({ ok: true, submissions }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
-  }
-
   if (pathname === '/api/content' && method === 'GET') {
     if (!authenticated) {
       return send(req, res, 401, JSON.stringify({ ok: false, message: 'Sesion no valida' }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
