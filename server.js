@@ -83,7 +83,7 @@ function buildSecurityHeaders(req, extraHeaders = {}) {
       "script-src 'self' https://cdn.jsdelivr.net",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
       "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com data:",
-      "img-src 'self' data: https://www.google.com https://maps.gstatic.com https://maps.googleapis.com",
+      "img-src 'self' data: https://www.google.com https://maps.gstatic.com https://maps.googleapis.com https://archive.org https://*.archive.org",
       "frame-src https://www.google.com",
       "connect-src 'self'"
     ].join('; ')
